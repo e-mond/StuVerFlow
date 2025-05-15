@@ -1,6 +1,10 @@
-// Importing necessary dependencies for the component
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import KofiImg from "../../assets/images/KofiAbban.jpg";
+import EdmondImg from "../../assets/images/Edmond.JPG";
+import IsaacImg from "../../assets/images/Issac.jpg";
+import PeggyImg from "../../assets/images/Peggy.jpg";
+import JamesImg from "../../assets/images/James.jpg";
 
 // Animation variants for staggered entrance
 const containerVariants = {
@@ -25,27 +29,27 @@ const MeetTheTeamSection = () => {
     {
       name: "Kofi Abban Davis",
       profileLink: "https://github.com/WingsDavis",
-      img: "/src/assets/images/KofiAbban.jpg",
+      img: KofiImg,
     },
     {
       name: "Edmond Anderson",
       profileLink: "https://github.com/e-mond",
-      img: "/src/assets/images/Edmond.JPG",
+      img: EdmondImg,
     },
     {
       name: "Isaac Crentsil",
       profileLink: "https://github.com/ikeCrest",
-      img: "/src/assets/images/Issac.jpg",
+      img: IsaacImg,
     },
     {
       name: "Peggy Halm",
       profileLink: "https://github.com/peggyhalm",
-      img: "/src/assets/images/Peggy.jpg",
+      img: PeggyImg,
     },
     {
       name: "James Quaicoe",
       profileLink: "https://github.com/James0547",
-      img: "/src/assets/images/James.jpg",
+      img: JamesImg,
     },
   ];
 

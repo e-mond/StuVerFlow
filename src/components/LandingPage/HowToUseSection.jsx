@@ -1,5 +1,8 @@
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom"; // ✅ React Router hook for navigation
+import { useNavigate } from "react-router-dom";
+import ShareImg from "../../assets/images/Share.jpg";
+import JoinImg from "../../assets/images/Join.jpg";
+import GetImg from "../../assets/images/Get.jpg";
 
 // Animation variants
 const containerVariants = {
@@ -23,24 +26,24 @@ const features = [
     title: "Share Your Knowledge and Expertise",
     description:
       "Support your peers by answering questions in your area of study. Share what you know, help others grow, and build your academic presence with every answer..",
-    img: "/src/assets/images/Share.jpg",
+    img: ShareImg,
   },
   {
     title: "Join Discussions and Build Connections",
     description:
       "Be part of active conversations in your study community. Ask questions, get helpful answers, and form connections that support your academic success.",
-    img: "/src/assets/images/Join.jpg",
+    img: JoinImg,
   },
   {
     title: "Get Help Fast from Students Like You",
     description:
       "Whether you're stuck on a tricky problem or need quick clarification, StuVerFlow connects you with fellow students who’ve been there. Get real answers, fast — from peers who understand your area of study and are ready to help.",
-    img: "/src/assets/images/Get.jpg",
+    img: GetImg,
   },
 ];
 
 const HowToUseSection = () => {
-  const navigate = useNavigate(); // ✅ Hook must be inside component
+  const navigate = useNavigate();
 
   return (
     <section className="bg-white text-gray-900 py-12 sm:py-20 px-4 sm:px-6 lg:px-8">
@@ -112,7 +115,7 @@ const HowToUseSection = () => {
         {/* Sign Up Action */}
         <motion.div className="flex" variants={itemVariants}>
           <button
-            onClick={() => navigate("/signup")} // ✅ Navigation to signup
+            onClick={() => navigate("/signup")}
             className="flex items-center gap-1 text-sm sm:text-base font-medium text-kiwi-700 hover:underline"
             style={{ fontFamily: "'Fira Sans', sans-serif" }}
           >
