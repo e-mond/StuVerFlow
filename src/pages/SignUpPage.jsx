@@ -180,10 +180,11 @@ const SignUpPage = () => {
           transition={{ duration: 0.5 }}
         >
           {/* StuVerFlow Logo */}
-          <div className="flex justify-center mb-4 sm:mb-6">
-            <div className="text-2xl sm:text-3xl font-bold text-kiwi-700">
-              StuVerFlow
-            </div>
+          <div
+            className="flex justify-center mb-4 sm:mb-6 text-3xl text-kiwi-700 font-bold"
+            style={{ fontFamily: "'Sacramento', cursive" }}
+          >
+            StuVerFlow
           </div>
 
           {/* Card header */}

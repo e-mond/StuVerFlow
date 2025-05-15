@@ -74,8 +74,11 @@ const LoginPage = () => {
         >
           {/* Logo */}
           <div className="flex justify-center mb-6">
-            <div className="text-3xl font-bold text-kiwi-700">
-              Your Project Name
+            <div
+              className="text-3xl text-kiwi-700 font-bold"
+              style={{ fontFamily: "'Sacramento', cursive" }}
+            >
+              StuVerFlow
             </div>
           </div>
 
