@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Button from "../components/common/Button";
-import { login } from "../utils/api";
+//import { login } from "../utils/api";
 
 // Component rendering the login page with a form, promotional image section, signup option, and forgot password link
 const LoginPage = () => {
@@ -11,6 +11,7 @@ const LoginPage = () => {
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -27,9 +28,11 @@ const LoginPage = () => {
       if (!email || !password) {
         throw new Error("Email and password are required");
       }
-      const response = await login({ email, password });
-      alert("Login successful! Welcome back, " + response.username);
+
+      //await login({ email, password });
+
       setFormData({ email: "", password: "" });
+      navigate("/home");
     } catch (error) {
       console.error("Error logging in:", error);
       alert(error.message || "Failed to log in.");
@@ -40,7 +43,7 @@ const LoginPage = () => {
 
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Left side with promotional image and glass-like effect (hidden on mobile) */}
+      {/* Left side  */}
       <div
         className="hidden lg:flex w-1/2 bg-cover bg-center relative"
         style={{
@@ -69,9 +72,11 @@ const LoginPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* StuVerFlow Logo */}
+          {/* Logo */}
           <div className="flex justify-center mb-6">
-            <div className="text-3xl font-bold text-kiwi-700">StuVerFlow</div>
+            <div className="text-3xl font-bold text-kiwi-700">
+              Your Project Name
+            </div>
           </div>
 
           {/* Card header with icon and description */}
@@ -82,7 +87,7 @@ const LoginPage = () => {
                 Log In to Your Account
               </h2>
               <p className="text-gray-600 text-sm">
-                Access StuVerFlow to continue your learning journey.
+                Access the platform to continue your learning journey.
               </p>
             </div>
           </div>
