@@ -10,7 +10,7 @@ export {
   editQuestion,
   archiveQuestion,
   reportQuestion,
-} from "../api/questions";
+} from "../api/question.js";
 
 export { fetchTrendingTags, fetchTopic } from "../api/tags";
 export {
