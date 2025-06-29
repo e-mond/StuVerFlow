@@ -4,22 +4,22 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 // Sample testimonials data
 const testimonials = [
   {
-    name: "Alice Johnson",
-    title: "Student, University",
+    name: "Micheal Quaye",
+    title: "Student, University of Ghana",
     quote: "This platform has made collaboration effortless and enjoyable!",
   },
   {
     name: "Mark Smith",
-    title: "Researcher, College",
+    title: "Researcher, St. Johns College",
     quote: "I love how easy it is to ask questions and get answers!",
   },
   {
-    name: "Sarah Lee",
-    title: "PhD Candidate, Tech Institute",
+    name: "Sarah Ansah",
+    title: "PhD Candidate, Accra Tech Institute",
     quote: "StuVerFlow connects me with people working on similar problems.",
   },
   {
-    name: "David Kim",
+    name: "David Owusu",
     title: "Postdoc, Science Lab",
     quote: "Finding collaborators and resources has never been easier!",
   },

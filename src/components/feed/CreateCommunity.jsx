@@ -1,37 +1,35 @@
 import { useState } from "react";
+import { useUser } from "../../context/useUser";
 import Button from "../common/Button";
+import { createCommunity } from "../../utils/api";
 
 // Component for creating a new community
 const CreateCommunity = ({ onClose, onCreate }) => {
+  const { user } = useUser();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !description) {
-      setError("Name and description are required");
+    if (!user?.id) {
+      setError("Please log in to create a community.");
       return;
     }
-    if (name.length < 3) {
-      setError("Name must be at least 3 characters long");
-      return;
-    }
-    if (description.length < 10) {
-      setError("Description must be at least 10 characters long");
-      return;
-    }
-    const newGroup = {
-      id: Date.now(),
-      name,
-      description,
-      members: 1, // Initial member (creator)
-    };
-    onCreate(newGroup);
-    onClose();
-    setName("");
-    setDescription("");
     setError("");
+    setIsSubmitting(true);
+    try {
+      const newGroup = await createCommunity(user.id, { name, description });
+      onCreate(newGroup);
+      onClose();
+      setName("");
+      setDescription("");
+    } catch (err) {
+      setError(err.message || "Failed to create community.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -54,6 +52,7 @@ const CreateCommunity = ({ onClose, onCreate }) => {
               onChange={(e) => setName(e.target.value)}
               className="w-full p-2 rounded border border-gray-300 bg-white"
               aria-label="Community name"
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -63,13 +62,14 @@ const CreateCommunity = ({ onClose, onCreate }) => {
               onChange={(e) => setDescription(e.target.value)}
               className="w-full p-2 rounded border border-gray-300 bg-white"
               aria-label="Community description"
+              disabled={isSubmitting}
             />
           </div>
           <div className="flex gap-2">
-            <Button variant="kiwi" type="submit">
-              Create
+            <Button variant="kiwi" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create"}
             </Button>
-            <Button variant="kiwi" onClick={onClose}>
+            <Button variant="kiwi" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
           </div>

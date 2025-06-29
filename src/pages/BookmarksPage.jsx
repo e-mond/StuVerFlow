@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/useUser";
 import Sidebar from "../components/common/Sidebar";
 import QuestionCard from "../components/feed/QuestionCard";
@@ -7,40 +8,45 @@ import { fetchBookmarks, bookmarkQuestion } from "../utils/api";
 
 // Component for displaying and managing bookmarked questions
 const BookmarksPage = () => {
-  // State for bookmarks, filter, loading, and error handling
+  const { user } = useUser();
+  const navigate = useNavigate();
   const [bookmarks, setBookmarks] = useState([]);
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Access user context to get user ID
-  const { user } = useUser();
+  // Redirect to login if user is not authenticated
+  useEffect(() => {
+    if (!user?.id) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
 
-  // Fetch bookmarks on component mount
+  // Fetch bookmarks
   useEffect(() => {
     const loadBookmarks = async () => {
       try {
+        setLoading(true);
+        setError(null);
         const bookmarkData = await fetchBookmarks(user.id);
-        const bookmarkedQuestions = bookmarkData.map((bookmark) => ({
-          ...bookmark.question,
-          isBookmarked: true,
-        }));
-        setBookmarks(bookmarkedQuestions);
+        setBookmarks(bookmarkData);
       } catch (err) {
         setError(err.message || "Failed to fetch bookmarks.");
       } finally {
         setLoading(false);
       }
     };
-    loadBookmarks();
+    if (user?.id) {
+      loadBookmarks();
+    }
   }, [user]);
 
-  // Handle bookmark toggle (add/remove)
+  // Handle bookmark toggle
   const handleBookmarkToggle = async (questionId, isBookmarked) => {
     try {
       await bookmarkQuestion(questionId, user.id, !isBookmarked);
       setBookmarks((prev) =>
-        !isBookmarked
+        isBookmarked
           ? prev.filter((q) => q.id !== questionId)
           : [...prev, { id: questionId, isBookmarked: true }],
       );
@@ -71,24 +77,27 @@ const BookmarksPage = () => {
     );
   }
 
+  // Render error state
+  if (error) {
+    return (
+      <div className="flex min-h-screen bg-white">
+        <Sidebar />
+        <div className="flex-1 p-4 sm:p-6">
+          <p className="text-red-500 text-sm sm:text-base" role="alert">
+            {error}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Sidebar for navigation */}
       <Sidebar />
       <div className="flex-1 p-4 sm:p-6 max-w-6xl mx-auto">
-        {/* Page title */}
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
           Bookmarks
         </h1>
-
-        {/* Error message display */}
-        {error && (
-          <p className="text-red-500 text-sm sm:text-base mb-4" role="alert">
-            {error}
-          </p>
-        )}
-
-        {/* Filter bar for sorting bookmarks */}
         <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2 mb-6">
           <div className="flex flex-wrap gap-2">
             <Button
@@ -120,8 +129,6 @@ const BookmarksPage = () => {
             </Button>
           </div>
         </div>
-
-        {/* Bookmarks list */}
         {filteredBookmarks.length > 0 ? (
           <div className="space-y-4">
             {filteredBookmarks.map((question) => (

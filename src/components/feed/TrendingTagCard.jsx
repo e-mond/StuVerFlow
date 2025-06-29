@@ -1,22 +1,14 @@
-// Importing React for component creation
 import React from "react";
 
-// Component displaying a single trending tag
 const TrendingTagCard = ({ tag, count }) => {
   return (
-    <div className="bg-gray-50 p-3 rounded-lg shadow-sm">
-      {/* Tag name with link to topic page */}
-      <a
-        href={`/topics/${tag}`}
-        className="text-kiwi hover:text-kiwi-dark text-sm sm:text-base font-medium"
-      >
-        #{tag}
-      </a>
-      {/* Number of posts associated with the tag */}
-      <p className="text-gray-600 text-xs sm:text-sm mt-1">
-        {count} {count === 1 ? "post" : "posts"}
-      </p>
-    </div>
+    <a
+      href={`/topics/${tag}`}
+      className="text-[13px] sm:text-sm px-2 py-1 bg-kiwi-50 border border-kiwi-200 text-kiwi-800 rounded-full flex items-center gap-2 hover:bg-kiwi-100 transition"
+    >
+      <span className="font-medium">#{tag}</span>
+      <span className="text-xs text-gray-500">({count})</span>
+    </a>
   );
 };
 

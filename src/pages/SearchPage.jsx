@@ -1,222 +1,168 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../components/common/Sidebar";
 import HotQuestionCard from "../components/explore/HotQuestionCard";
 import StudyGroupCard from "../components/explore/StudyGroupCard";
-import Button from "../components/common/Button";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import TrendingTagCard from "../components/feed/TrendingTagCard";
+import Filter from "../components/common/Filter";
+import NewUsers from "../components/feed/NewUsers";
+import SearchBar from "../components/common/SearchBar";
+import {
+  fetchTrendingTags,
+  fetchHotQuestions,
+  fetchStudyGroups,
+  fetchNewUsers,
+} from "../utils/api";
 
-// Mock data for trending tags
-const mockTrendingTags = [
-  "math",
-  "ai",
-  "biology",
-  "history",
-  "coding",
-  "physics",
-];
-
-// Mock data for hot questions
-const mockHotQuestions = [
-  {
-    id: 1,
-    title: "How to solve this calculus problem?",
-    askedBy: "Jamie Lee",
-    answers: 12,
-  },
-  {
-    id: 2,
-    title: "Best AI tools for students?",
-    askedBy: "Priya S.",
-    answers: 8,
-  },
-  {
-    id: 3,
-    title: "Tips for group study success?",
-    askedBy: "Omar R.",
-    answers: 5,
-  },
-];
-
-// Mock data for new users
-const mockNewUsers = [
-  {
-    id: 1,
-    name: "Maya Patel",
-    avatar: "https://via.placeholder.com/40?text=M",
-    joined: "2h ago",
-  },
-  {
-    id: 2,
-    name: "Ethan Zhou",
-    avatar: "https://via.placeholder.com/40?text=E",
-    joined: "1h ago",
-  },
-  {
-    id: 3,
-    name: "Sara Gomez",
-    avatar: "https://via.placeholder.com/40?text=S",
-    joined: "5m ago",
-  },
-];
-
-// Mock data for study groups
-const mockStudyGroups = [
-  {
-    id: 1,
-    name: "Math Study Group",
-    description: "A group for students preparing for calculus exams.",
-    members: 25,
-  },
-  {
-    id: 2,
-    name: "AI Enthusiasts",
-    description: "Discussing the latest in AI and machine learning.",
-    members: 18,
-  },
-];
-
-// Component for searching and displaying various sections
 const SearchPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredTopics, setFilteredTopics] = useState(mockTrendingTags);
   const [filterCategory, setFilterCategory] = useState("All");
+  const [trendingTags, setTrendingTags] = useState([]);
+  const [hotQuestions, setHotQuestions] = useState([]);
+  const [studyGroups, setStudyGroups] = useState([]);
+  const [newUsers, setNewUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleSearch = (query) => {
-    setSearchQuery(query);
-    const lowerQuery = query.toLowerCase();
-    const topicResults = mockTrendingTags.filter((tag) =>
-      tag.toLowerCase().includes(lowerQuery),
-    );
-    setFilteredTopics(topicResults);
-  };
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const [tags, questions, groups, users] = await Promise.all([
+          fetchTrendingTags(searchQuery),
+          fetchHotQuestions(searchQuery),
+          fetchStudyGroups(searchQuery),
+          fetchNewUsers(searchQuery),
+        ]);
+        setTrendingTags(tags);
+        setHotQuestions(questions);
+        setStudyGroups(groups);
+        setNewUsers(users);
+      } catch (err) {
+        setError(err.message || "Failed to load data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [searchQuery]);
 
-  const handleFilterChange = (category) => {
-    setFilterCategory(category);
-    if (category === "All") {
-      setFilteredTopics(mockTrendingTags);
-    } else {
-      setFilteredTopics(
-        mockTrendingTags.filter(
-          (tag) => tag.toLowerCase() === category.toLowerCase(),
-        ),
-      );
-    }
-  };
+  const handleSearch = (query) => setSearchQuery(query);
+  const handleFilterChange = (category) => setFilterCategory(category);
 
-  return (
-    <div className="flex min-h-screen bg-white">
-      <Sidebar />
-      <div className="flex-1 p-4">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Search</h1>
+  const filteredHotQuestions = hotQuestions.filter(
+    () => filterCategory === "All" || filterCategory === "Questions",
+  );
 
-        {/* Search Bar with Filter Buttons */}
-        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2 mb-6">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Search for topics..."
-            className="flex-1 p-2 rounded-lg bg-kiwi-50 text-gray-900 placeholder-gray-500 border border-kiwi-200 focus:outline-none focus:ring-2 focus:ring-kiwi-700"
-          />
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-            <Button
-              variant={filterCategory === "All" ? "kiwi" : "outline"}
-              size="sm"
-              onClick={() => handleFilterChange("All")}
-            >
-              All
-            </Button>
-            <Button
-              variant={filterCategory === "Math" ? "kiwi" : "outline"}
-              size="sm"
-              onClick={() => handleFilterChange("Math")}
-            >
-              Math
-            </Button>
-            <Button
-              variant={filterCategory === "AI" ? "kiwi" : "outline"}
-              size="sm"
-              onClick={() => handleFilterChange("AI")}
-            >
-              AI
-            </Button>
-          </div>
-        </div>
+  const filteredStudyGroups = studyGroups.filter(
+    () => filterCategory === "All" || filterCategory === "Groups",
+  );
 
-        <div className="space-y-5">
-          {/* Trending Tags Section */}
-          <div>
-            <h2 className="text-lg font-bold text-gray-900 mb-2">
-              Trending Tags
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {filteredTopics.length > 0 ? (
-                filteredTopics.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="bg-kiwi-50 text-kiwi-700 px-2 py-1 rounded-full text-sm"
-                  >
-                    {tag}
-                  </span>
-                ))
-              ) : (
-                <p className="text-gray-600">No tags found.</p>
-              )}
-            </div>
-          </div>
+  const filteredTrendingTags = trendingTags.filter(
+    () => filterCategory === "All" || filterCategory === "Trends",
+  );
 
-          {/* Hot Questions Section */}
-          <div>
-            <h2 className="text-lg font-bold text-gray-900 mb-2">
-              Hot Questions
-            </h2>
-            <div className="flex space-x-4 overflow-x-auto pb-2">
-              <FaChevronLeft className="text-kiwi-700 cursor-pointer hidden sm:block" />
-              {mockHotQuestions.map((question) => (
-                <HotQuestionCard key={question.id} question={question} />
-              ))}
-              <FaChevronRight className="text-kiwi-700 cursor-pointer hidden sm:block" />
-            </div>
-          </div>
+  const filteredNewUsers = newUsers.filter(
+    () => filterCategory === "All" || filterCategory === "Experts",
+  );
 
-          {/* New Users Section (Single Card) */}
-          <div>
-            <h2 className="text-lg font-bold text-gray-900 mb-2">New Users</h2>
-            <div className="bg-kiwi-50 p-4 rounded-lg shadow-md">
-              {mockNewUsers.map((user) => (
-                <div
-                  key={user.id}
-                  className="flex items-center space-x-3 mb-4 last:mb-0"
-                >
-                  <img
-                    src={user.avatar}
-                    alt={`${user.name}'s avatar`}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">
-                      {user.name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Joined {user.joined}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Study Groups Section */}
-          <div>
-            <h2 className="text-lg font-bold text-gray-900 mb-2">
-              Study Groups
-            </h2>
-            {mockStudyGroups.map((group) => (
-              <StudyGroupCard key={group.id} group={group} />
-            ))}
-          </div>
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-white">
+        <Sidebar />
+        <div className="flex-1 p-6 flex items-center justify-center">
+          <p
+            className="text-gray-600 text-sm sm:text-base animate-pulse"
+            role="status"
+          >
+            Loading...
+          </p>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col lg:flex-row min-h-screen bg-white">
+      <Sidebar />
+      <main className="flex-1 p-4 space-y-4">
+        {error && (
+          <p className="text-red-500 text-sm" role="alert">
+            {error}
+          </p>
+        )}
+        <section className="bg-white border border-kiwi-100 rounded-xl shadow-sm p-3 flex items-center gap-4">
+          <SearchBar onSearch={handleSearch} />
+          <Filter
+            currentFilter={filterCategory}
+            onFilterChange={handleFilterChange}
+          />
+        </section>
+
+        {/* Trending Tags Section */}
+        {(filterCategory === "All" || filterCategory === "Trends") && (
+          <section className="bg-white border border-kiwi-100 rounded-xl shadow-sm p-3">
+            <h2 className="text-base font-semibold text-gray-900 mb-2">
+              Trending Tags
+            </h2>
+            <div className="overflow-x-auto whitespace-nowrap flex gap-2 sm:flex-wrap sm:whitespace-normal">
+              {filteredTrendingTags.length > 0 ? (
+                filteredTrendingTags.map(({ name, count }, index) => (
+                  <TrendingTagCard key={index} tag={name} count={count} />
+                ))
+              ) : (
+                <p className="text-gray-600 text-sm">No tags found.</p>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* Hot Questions Section */}
+        {(filterCategory === "All" || filterCategory === "Questions") && (
+          <section className="bg-white border border-kiwi-100 rounded-xl shadow-sm p-3">
+            <h2 className="text-base font-semibold text-gray-900 mb-2">
+              Hot Questions
+            </h2>
+            <div className="flex overflow-x-auto gap-3 snap-x snap-mandatory lg:grid lg:grid-cols-4">
+              {filteredHotQuestions.length > 0 ? (
+                filteredHotQuestions.map((q) => (
+                  <HotQuestionCard key={q.id} question={q} />
+                ))
+              ) : (
+                <p className="text-gray-600 text-sm">No questions found.</p>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* Study Groups Section */}
+        {(filterCategory === "All" || filterCategory === "Groups") && (
+          <section className="bg-white border border-kiwi-100 rounded-xl shadow-sm p-3">
+            <h2 className="text-base font-semibold text-gray-900 mb-2">
+              Study Groups
+            </h2>
+            <div className="flex flex-col gap-2 text-sm">
+              {filteredStudyGroups.length > 0 ? (
+                filteredStudyGroups.map((group) => (
+                  <StudyGroupCard key={group.id} group={group} />
+                ))
+              ) : (
+                <p className="text-gray-600 text-sm">No study groups found.</p>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* New Users Section */}
+        {(filterCategory === "All" || filterCategory === "Experts") && (
+          <section className="bg-white border border-kiwi-100 rounded-xl shadow-sm p-3">
+            <h2 className="text-base font-semibold text-gray-900 mb-2">
+              New Users
+            </h2>
+            <NewUsers users={filteredNewUsers} />
+          </section>
+        )}
+      </main>
     </div>
   );
 };

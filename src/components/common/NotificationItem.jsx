@@ -26,17 +26,9 @@ const getIcon = (message) => {
   return <FaCheckCircle className="text-green-500" />;
 };
 
-/**
- * A single notification item component.
- *
- * Props:
- * - message: The content of the notification.
- * - timestamp: The time the notification was created.
- * - isRead: Boolean indicating if the notification has been read.
- * - link: The URL to navigate to when the notification is clicked.
- */
+// A single notification item component
 const NotificationItem = ({ message, timestamp, isRead, link }) => {
-  // Format the timestamp for display
+  // Formats the timestamp for display
   const formattedDate = new Date(timestamp).toLocaleString("en-US", {
     month: "short",
     day: "numeric",
@@ -45,7 +37,7 @@ const NotificationItem = ({ message, timestamp, isRead, link }) => {
     minute: "2-digit",
   });
 
-  // Handle keyboard accessibility (Enter or Space to activate link)
+  // Handles keyboard accessibility (Enter or Space to activate link)
   const handleKeyDown = (e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
@@ -56,7 +48,7 @@ const NotificationItem = ({ message, timestamp, isRead, link }) => {
   return (
     <Link
       to={link}
-      className={`block focus:outline-none focus:ring-2 focus:ring-kiwi-500 rounded-lg`}
+      className="block focus:outline-none focus:ring-2 focus:ring-kiwi-500 rounded-lg"
       tabIndex={0}
       onKeyDown={handleKeyDown}
     >
@@ -65,7 +57,6 @@ const NotificationItem = ({ message, timestamp, isRead, link }) => {
           isRead ? "bg-white" : "bg-kiwi-50"
         } hover:bg-kiwi-100`}
       >
-        {/* Left section with icon and message */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-kiwi-100 rounded-full flex items-center justify-center">
             {getIcon(message)}
@@ -75,14 +66,13 @@ const NotificationItem = ({ message, timestamp, isRead, link }) => {
             <p className="text-xs text-gray-500">{formattedDate}</p>
           </div>
         </div>
-        {/* Right section with arrow indicator */}
         <div className="text-xl text-gray-400 hover:text-gray-600">›</div>
       </div>
     </Link>
   );
 };
 
-// Define prop types for type checking
+// Defines prop types for type checking
 NotificationItem.propTypes = {
   message: PropTypes.string.isRequired,
   timestamp: PropTypes.string.isRequired,

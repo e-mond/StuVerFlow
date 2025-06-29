@@ -2,15 +2,17 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "../components/common/Button";
-//import { login } from "../utils/api";
+import { login } from "../utils/api";
+import { Eye, EyeOff } from "lucide-react";
 
-// Component rendering the login page with a form, promotional image section, signup option, and forgot password link
 const LoginPage = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   // Handle form input changes
@@ -29,7 +31,9 @@ const LoginPage = () => {
         throw new Error("Email and password are required");
       }
 
-      //await login({ email, password });
+      //  login API Request
+      const userData = await login({ email, password });
+      console.log("Logged in user:", userData);
 
       setFormData({ email: "", password: "" });
       navigate("/home");
@@ -43,7 +47,7 @@ const LoginPage = () => {
 
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Left side  */}
+      {/* Left side */}
       <div
         className="hidden lg:flex w-1/2 bg-cover bg-center relative"
         style={{
@@ -117,8 +121,8 @@ const LoginPage = () => {
               />
             </div>
 
-            {/* Password field */}
-            <div className="mb-4">
+            {/* Password field with visibility toggle */}
+            <div className="mb-4 relative">
               <label
                 htmlFor="password"
                 className="block text-gray-700 font-medium"
@@ -126,16 +130,24 @@ const LoginPage = () => {
                 Password
               </label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 id="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full p-2 rounded border border-kiwi-200 bg-kiwi-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-kiwi-700"
+                className="w-full p-2 pr-10 rounded border border-kiwi-200 bg-kiwi-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-kiwi-700"
                 required
                 aria-label="Password"
                 placeholder="Enter your password"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute top-9 right-3 text-gray-500"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
 
             {/* Submit button */}
@@ -156,7 +168,7 @@ const LoginPage = () => {
               </p>
               <p className="text-gray-600 text-sm">
                 <Link
-                  to="/forgot-password"
+                  to="/forgotpassword"
                   className="text-kiwi-700 hover:underline font-medium"
                 >
                   Forgot Password?
