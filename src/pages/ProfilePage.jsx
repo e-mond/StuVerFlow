@@ -1,147 +1,131 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useUser } from "../context/useUser";
 import Button from "../components/common/Button";
 import { getUserProfile } from "../utils/api";
 
-// Component rendering the profile page with user details and promotional image section
+// Component to display and manage user profile
 const ProfilePage = () => {
+  const { user: authUser } = useUser();
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
 
-  // Fetch user profile data on component mount
+  // Redirect to login if user is not authenticated
+  useEffect(() => {
+    if (!authUser?.id) {
+      navigate("/login");
+    }
+  }, [authUser, navigate]);
+
+  // Load user data
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const userId = 1; // Hardcoded for demo; should come from auth context
-        const response = await getUserProfile(userId);
-        setUser(response);
+        if (authUser?.id) {
+          const response = await getUserProfile(authUser.id);
+          setUser(response);
+        }
       } catch (err) {
-        setError(err.message || "Failed to load profile");
+        setError(err.message || "Failed to load profile.");
       }
     };
     fetchProfile();
-  }, []);
+  }, [authUser]);
 
+  // Error state
   if (error) {
     return (
-      <div className="flex min-h-screen bg-white justify-center items-center p-4">
-        <p className="text-red-600">{error}</p>
+      <div className="flex min-h-screen justify-center items-center bg-white px-4">
+        <p className="text-red-600 text-center">{error}</p>
       </div>
     );
   }
 
+  // Loading state
   if (!user) {
     return (
-      <div className="flex min-h-screen bg-white justify-center items-center p-4">
-        <p className="text-gray-600">Loading profile...</p>
+      <div className="flex min-h-screen justify-center items-center bg-white px-4">
+        <p className="text-gray-500 text-sm">Loading profile...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-white">
-      {/* Left side with promotional image and glass-like effect (hidden on mobile) */}
+    <div className="flex flex-col lg:flex-row min-h-screen bg-gradient-to-tr from-kiwi-50 to-white">
       <div
-        className="hidden lg:flex w-1/2 bg-cover bg-center relative"
+        className="hidden lg:flex lg:w-1/2 bg-cover bg-center relative"
         style={{
           backgroundImage:
             "url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80')",
         }}
       >
-        <div className="absolute inset-0 bg-white/30 backdrop-blur-md flex flex-col justify-center items-center p-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Your StuVerFlow Profile
+        <div className="absolute inset-0 bg-white/30 backdrop-blur-sm flex flex-col justify-center items-center p-10">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4 text-center">
+            Your Profile Hub
           </h2>
           <p className="text-gray-700 text-lg text-center max-w-md">
-            Showcase your academic journey, connect with peers, and share your
-            expertise.
+            Keep your academic presence updated and professional.
           </p>
         </div>
       </div>
-
-      {/* Main content with user profile */}
-      <div className="flex-1 flex justify-center items-center p-4 w-full lg:w-1/2">
+      <div className="flex-1 flex justify-center items-center p-4 sm:p-6 lg:p-10">
         <motion.div
-          className="bg-white p-6 rounded-lg shadow-md border border-kiwi-200 w-full max-w-lg"
+          className="w-full max-w-3xl bg-white rounded-xl border border-kiwi-200 shadow-md p-6 sm:p-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4 }}
         >
-          {/* StuVerFlow Logo */}
-          <div className="flex justify-center mb-6">
-            <div className="text-3xl font-bold text-kiwi-700">StuVerFlow</div>
+          <div className="text-center mb-8">
+            <div className="text-3xl font-extrabold text-kiwi-700">
+              StuVerFlow
+            </div>
+            <p className="text-sm text-gray-500 mt-1">
+              Academic Profile Manager
+            </p>
           </div>
-
-          {/* Card header with icon and description */}
-          <div className="flex items-center mb-6 p-4 bg-kiwi-50 rounded-lg">
-            <span className="text-2xl mr-2">👤</span>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                Your Profile
-              </h2>
-              <p className="text-gray-600 text-sm">
-                View and manage your personal information.
-              </p>
-            </div>
+          <div className="bg-kiwi-50 border border-kiwi-100 rounded-lg p-4 mb-6">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Your Profile
+            </h2>
+            <p className="text-sm text-gray-600">
+              Manage your academic identity and contact info.
+            </p>
           </div>
-
-          {/* Profile details */}
-          <div className="space-y-4">
-            <div>
-              <label className="block text-gray-700 font-medium">
-                Username
-              </label>
-              <p className="text-gray-900">{user.username}</p>
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium">Handle</label>
-              <p className="text-gray-900">@{user.handle}</p>
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium">Email</label>
-              <p className="text-gray-900">{user.email}</p>
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium">Name</label>
-              <p className="text-gray-900">
-                {user.firstName} {user.surname}
-              </p>
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium">
-                Date of Birth
-              </label>
-              <p className="text-gray-900">{user.dob || "Not provided"}</p>
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium">
-                Contact Number
-              </label>
-              <p className="text-gray-900">{user.contact || "Not provided"}</p>
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium">
-                Institution
-              </label>
-              <p className="text-gray-900">
-                {user.institution || "Not provided"}
-              </p>
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium">Course</label>
-              <p className="text-gray-900">{user.course || "Not provided"}</p>
-            </div>
-            <div>
-              <label className="block text-gray-700 font-medium">Bio</label>
-              <p className="text-gray-900">{user.bio || "Not provided"}</p>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <ProfileField label="Username" value={user.username} />
+            <ProfileField label="Handle" value={`@${user.handle}`} />
+            <ProfileField label="Email" value={user.email} />
+            <ProfileField
+              label="Full Name"
+              value={`${user.firstName} ${user.surname}`}
+            />
+            <ProfileField
+              label="Date of Birth"
+              value={user.dob || "Not provided"}
+            />
+            <ProfileField
+              label="Contact Number"
+              value={user.contact || "Not provided"}
+            />
+            <ProfileField
+              label="Institution"
+              value={user.institution || "Not provided"}
+            />
+            <ProfileField
+              label="Course"
+              value={user.course || "Not provided"}
+            />
+            <ProfileField
+              label="Bio"
+              value={user.bio || "Not provided"}
+              className="sm:col-span-2"
+            />
           </div>
-
-          {/* Edit Profile button */}
-          <div className="mt-6">
-            <Button variant="kiwi">
-              <Link to="/edit-profile">Edit Profile</Link>
+          <div className="mt-8 text-end">
+            <Button variant="kiwi" size="sm" as={Link} to="/edit-profile">
+              Edit Profile
             </Button>
           </div>
         </motion.div>
@@ -149,5 +133,15 @@ const ProfilePage = () => {
     </div>
   );
 };
+
+// Reusable field component for consistent layout
+const ProfileField = ({ label, value, className = "" }) => (
+  <div className={`flex flex-col ${className}`}>
+    <label className="text-sm text-gray-600 font-medium mb-1">{label}</label>
+    <p className="text-sm text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+      {value}
+    </p>
+  </div>
+);
 
 export default ProfilePage;

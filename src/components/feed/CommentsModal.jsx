@@ -1,15 +1,26 @@
 import { useState } from "react";
+import { useUser } from "../../context/useUser";
+import { postAnswer } from "../../utils/api";
 
-// Component rendering a modal for viewing and adding comments to a question
-const CommentsModal = ({ isOpen, onClose, answers, onReply }) => {
+const CommentsModal = ({ isOpen, onClose, answers, onReply, questionId }) => {
   const [replyText, setReplyText] = useState("");
+  const { user } = useUser();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!user?.id) {
+      alert("Please log in to post a reply.");
+      return;
+    }
     if (replyText.trim()) {
-      onReply(replyText);
-      setReplyText("");
-      onClose();
+      try {
+        await postAnswer(questionId, user.id, replyText);
+        onReply(replyText);
+        setReplyText("");
+        onClose();
+      } catch (error) {
+        alert(`Failed to post reply: ${error.message}`);
+      }
     }
   };
 
@@ -28,8 +39,6 @@ const CommentsModal = ({ isOpen, onClose, answers, onReply }) => {
             ✕
           </button>
         </div>
-
-        {/* Display Answers */}
         <div className="max-h-60 overflow-y-auto mb-4">
           {answers.length > 0 ? (
             answers.map((answer, index) => (
@@ -51,8 +60,6 @@ const CommentsModal = ({ isOpen, onClose, answers, onReply }) => {
             </p>
           )}
         </div>
-
-        {/* Reply Form */}
         <form onSubmit={handleSubmit}>
           <textarea
             value={replyText}

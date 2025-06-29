@@ -277,7 +277,7 @@ import Sidebar from "../components/common/Sidebar";
 import TrendingDiscussions from "../components/feed/TrendingDiscussions";
 import ExpertSpotlight from "../components/feed/ExpertSpotlight";
 import NewUsers from "../components/feed/NewUsers";
-import Footer from "../components/common/Footer";
+import Footer from "../components/feed/Statements";
 import {
   fetchHotQuestions,
   fetchQuestionsByInterests,

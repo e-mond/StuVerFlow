@@ -3,13 +3,20 @@ import { Link } from "react-router-dom";
 import { FaComment, FaEllipsisV, FaBookmark } from "react-icons/fa";
 import CommentsModal from "./CommentsModal";
 import Reactions from "./Reactions";
+import {
+  bookmarkQuestion,
+  deleteQuestion,
+  editQuestion,
+  archiveQuestion,
+  reportQuestion,
+} from "../../utils/api";
+import { useUser } from "../../context/useUser";
 
-// Component displaying a single question card with interactive features
 const QuestionCard = ({ question, onBookmarkToggle }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user } = useUser();
   const isRecommended = question.upvotes > 5;
-  const currentUser = { handle: "@eddie" }; // Mock current user; replace with auth logic
   const [isBookmarked, setIsBookmarked] = useState(
     question.isBookmarked || false,
   );
@@ -26,9 +33,18 @@ const QuestionCard = ({ question, onBookmarkToggle }) => {
     setIsMenuOpen(false);
   };
 
-  const handleReport = () => {
-    alert(`Reporting question ${question.id} by ${question.user.name}`);
-    setIsMenuOpen(false);
+  const handleReport = async () => {
+    if (!user?.id) {
+      alert("Please log in to report a question.");
+      return;
+    }
+    try {
+      await reportQuestion(question.id, user.id, "Inappropriate content");
+      alert("Question reported successfully.");
+      setIsMenuOpen(false);
+    } catch (error) {
+      alert(`Failed to report question: ${error.message || "Unknown error"}`);
+    }
   };
 
   const handleCopyLink = () => {
@@ -39,32 +55,69 @@ const QuestionCard = ({ question, onBookmarkToggle }) => {
     setIsMenuOpen(false);
   };
 
-  const handleDelete = () => {
-    alert(`Deleting question ${question.id} by ${question.user.name}`);
-    setIsMenuOpen(false);
-  };
-
-  const handleEdit = () => {
-    alert(`Editing question ${question.id}`);
-    setIsMenuOpen(false);
-  };
-
-  const handleArchive = () => {
-    alert(`Archiving question ${question.id} by ${question.user.name}`);
-    setIsMenuOpen(false);
-  };
-
-  const isPoster = currentUser.handle === question.user.handle;
-
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-    if (onBookmarkToggle) {
-      onBookmarkToggle(question.id, !isBookmarked);
+  const handleDelete = async () => {
+    if (!user?.id) {
+      alert("Please log in to delete a question.");
+      return;
     }
-    console.log(
-      `Question ${question.id} ${isBookmarked ? "removed from" : "added to"} bookmarks`,
-    );
+    try {
+      await deleteQuestion(question.id, user.id);
+      alert("Question deleted successfully.");
+      setIsMenuOpen(false);
+    } catch (error) {
+      alert(`Failed to delete question: ${error.message || "Unknown error"}`);
+    }
   };
+
+  const handleEdit = async () => {
+    if (!user?.id) {
+      alert("Please log in to edit a question.");
+      return;
+    }
+    try {
+      const updatedData = {
+        title: question.title,
+        description: question.description,
+      };
+      await editQuestion(question.id, user.id, updatedData);
+      alert("Question edited successfully.");
+      setIsMenuOpen(false);
+    } catch (error) {
+      alert(`Failed to edit question: ${error.message || "Unknown error"}`);
+    }
+  };
+
+  const handleArchive = async () => {
+    if (!user?.id) {
+      alert("Please log in to archive a question.");
+      return;
+    }
+    try {
+      await archiveQuestion(question.id, user.id);
+      alert("Question archived successfully.");
+      setIsMenuOpen(false);
+    } catch (error) {
+      alert(`Failed to archive question: ${error.message || "Unknown error"}`);
+    }
+  };
+
+  const handleBookmark = async () => {
+    if (!user?.id) {
+      alert("Please log in to bookmark a question.");
+      return;
+    }
+    try {
+      await bookmarkQuestion(question.id, user.id, !isBookmarked);
+      setIsBookmarked(!isBookmarked);
+      if (onBookmarkToggle) {
+        onBookmarkToggle(question.id, !isBookmarked);
+      }
+    } catch (error) {
+      alert(`Failed to bookmark question: ${error.message || "Unknown error"}`);
+    }
+  };
+
+  const isPoster = user?.handle === question.user.handle;
 
   return (
     <div className="p-4 rounded-lg border border-kiwi-200 bg-white shadow-sm hover:shadow-md transition relative sm:p-5">
@@ -178,6 +231,7 @@ const QuestionCard = ({ question, onBookmarkToggle }) => {
             <Reactions
               upvotes={question.upvotes}
               downvotes={question.downvotes}
+              questionId={question.id}
             />
             <button
               onClick={() => setIsModalOpen(true)}
@@ -203,6 +257,7 @@ const QuestionCard = ({ question, onBookmarkToggle }) => {
         onClose={() => setIsModalOpen(false)}
         answers={question.answers}
         onReply={handleReply}
+        questionId={question.id}
       />
     </div>
   );

@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 
-// Component rendering a search bar for filtering academic content
+/**
+ * SearchBar Component
+ * @param {function} onSearch - Callback to handle search query updates
+ */
 const SearchBar = ({ onSearch }) => {
   const [query, setQuery] = useState("");
 
@@ -21,7 +24,7 @@ const SearchBar = ({ onSearch }) => {
         value={query}
         onChange={handleChange}
         placeholder="Search"
-        className="w-full pl-10 pr-4 py-2 rounded-full  bg-white text-gray-900 placeholder-kiwi-500 border border-kiwi-200 focus:outline-none focus:ring-2 focus:ring-kiwi-700 transition-all"
+        className="w-full pl-10 pr-4 py-2 rounded-full bg-white text-gray-900 placeholder-kiwi-500 border border-kiwi-200 focus:outline-none focus:ring-2 focus:ring-kiwi-700 transition-all"
       />
     </div>
   );

@@ -13,28 +13,28 @@ import {
 
 // Component for displaying details of a specific community
 const CommunityDetailsPage = () => {
-  // State for community details, questions, loading, and error handling
   const [community, setCommunity] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [isMember, setIsMember] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Extract community ID from URL params and get user context
   const { communityId } = useParams();
   const { user } = useUser();
   const navigate = useNavigate();
 
-  // Fetch community details and questions on mount
+  // Redirect to login if user is not authenticated
+  useEffect(() => {
+    if (!user?.id) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
+
+  // Fetch community details and questions
   useEffect(() => {
     const loadCommunityData = async () => {
-      if (!user?.id) {
-        setError("Please log in to view community details.");
-        setLoading(false);
-        return;
-      }
       try {
-        // Fetch all study groups and find the matching community
+        setLoading(true);
+        setError(null);
         const groups = await fetchStudyGroups();
         const selectedCommunity = groups.find(
           (g) => g.id === parseInt(communityId),
@@ -45,12 +45,8 @@ const CommunityDetailsPage = () => {
           return;
         }
         setCommunity(selectedCommunity);
-
-        // Fetch questions for this community
         const communityQuestions = await fetchCommunityQuestions(communityId);
         setQuestions(communityQuestions);
-
-        // Check if user is a member (mocked for now)
         setIsMember(selectedCommunity.members.includes(user.id));
       } catch (err) {
         setError(err.message || "Failed to load community details.");
@@ -58,40 +54,31 @@ const CommunityDetailsPage = () => {
         setLoading(false);
       }
     };
-    loadCommunityData();
+    if (user?.id) {
+      loadCommunityData();
+    }
   }, [communityId, user]);
 
-  // Handle joining the community
   const handleJoin = async () => {
-    if (!user?.id) {
-      setError("Please log in to join the community.");
-      return;
-    }
     try {
-      await joinCommunity(communityId, user.id);
+      const { members } = await joinCommunity(communityId, user.id);
       setIsMember(true);
-      setCommunity((prev) => ({ ...prev, members: prev.members + 1 }));
+      setCommunity((prev) => ({ ...prev, members }));
     } catch (err) {
       setError(err.message || "Failed to join community.");
     }
   };
 
-  // Handle leaving the community
   const handleLeave = async () => {
-    if (!user?.id) {
-      setError("Please log in to leave the community.");
-      return;
-    }
     try {
-      await leaveCommunity(communityId, user.id);
+      const { members } = await leaveCommunity(communityId, user.id);
       setIsMember(false);
-      setCommunity((prev) => ({ ...prev, members: prev.members - 1 }));
+      setCommunity((prev) => ({ ...prev, members }));
     } catch (err) {
       setError(err.message || "Failed to leave community.");
     }
   };
 
-  // Render loading state
   if (loading) {
     return (
       <div className="flex min-h-screen bg-white">
@@ -107,10 +94,8 @@ const CommunityDetailsPage = () => {
 
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Sidebar for navigation */}
       <Sidebar />
       <div className="flex-1 p-4 sm:p-6 max-w-6xl mx-auto">
-        {/* Community header */}
         <div className="mb-6">
           {community ? (
             <>
@@ -147,15 +132,11 @@ const CommunityDetailsPage = () => {
             </p>
           )}
         </div>
-
-        {/* Error message display */}
         {error && (
           <p className="text-red-500 text-sm sm:text-base mb-4" role="alert">
             {error}
           </p>
         )}
-
-        {/* Community questions */}
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4">
           Questions
         </h2>

@@ -1,17 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/useUser";
 import QuestionForm from "../components/feed/QuestionForm";
 import Sidebar from "../components/common/Sidebar";
 import { FaCommentAlt } from "react-icons/fa";
 
-// AskQuestionPage component for creating and previewing a new question
+// Component for creating and previewing a new question
 const AskQuestionPage = () => {
-  // State to hold form data for live preview
+  const { user } = useUser();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     tags: [],
     image: null,
   });
+
+  // Redirect to login if user is not authenticated
+  useEffect(() => {
+    if (!user?.id) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
 
   // Update form data for live preview
   const handleFormChange = (data) => {
@@ -20,39 +30,27 @@ const AskQuestionPage = () => {
 
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Sidebar for navigation, collapsed on mobile */}
       <Sidebar />
-
-      {/* Main content area with responsive layout */}
       <div className="flex-1 border-x border-kiwi-200">
-        {/* Header section with title */}
         <div className="sticky top-0 bg-white border-kiwi-200 sm:p-4">
           <h1 className="text-lg sm:text-xl font-bold text-gray-900">
             Ask a Question
           </h1>
         </div>
-
-        {/* Form and preview section */}
         <div className="p-3 sm:p-4 space-y-6">
-          {/* Question form for user input */}
-          <div className="max-w-2xl mx-auto ">
+          <div className="max-w-2xl mx-auto">
             <QuestionForm onChange={handleFormChange} />
           </div>
-
-          {/* Live preview card */}
           <div className="max-w-xl mx-auto">
             <div className="bg-kiwi-50 rounded-lg shadow-md p-4 border border-kiwi-200">
-              {/* Header with message icon */}
               <div className="flex items-center mb-3">
-                <div className="w-7 h-7 bg-kiwi-200  border-kiwi-800 rounded-full flex items-center justify-center mr-2">
+                <div className="w-7 h-7 bg-kiwi-200 border-kiwi-800 rounded-full flex items-center justify-center mr-2">
                   <FaCommentAlt className="text-kiwi-700 text-base" />
                 </div>
                 <h2 className="text-sm sm:text-base font-semibold text-gray-900">
                   Live Preview
                 </h2>
               </div>
-
-              {/* Preview content */}
               {formData.title ||
               formData.description ||
               formData.tags.length > 0 ||

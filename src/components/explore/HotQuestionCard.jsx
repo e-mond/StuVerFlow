@@ -1,81 +1,107 @@
 import { Link } from "react-router-dom";
-import Button from "../common/Button";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { FaBookmark } from "react-icons/fa";
 import { bookmarkQuestion } from "../../utils/api";
 import { useUser } from "../../context/useUser";
-import { FaBookmark } from "react-icons/fa";
 import Reactions from "../feed/Reactions";
 
-// Component for displaying individual hot questions with bookmark and reaction functionality
 const HotQuestionCard = ({ question, onBookmarkToggle }) => {
-  // State to track bookmark status
   const [isBookmarked, setIsBookmarked] = useState(
     question.isBookmarked || false,
   );
-  // Accessing user context for user ID
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [showPreview, setShowPreview] = useState(false);
+  const touchStartX = useRef(null);
   const { user } = useUser();
 
-  // Handling bookmark toggle with API integration
+  // Bookmark toggle handler
   const handleBookmark = async () => {
     if (!user?.id) {
-      console.error("User not logged in");
+      alert("Please log in to bookmark questions.");
       return;
     }
     try {
-      // Toggling bookmark status via API
       await bookmarkQuestion(question.id, user.id, !isBookmarked);
       setIsBookmarked(!isBookmarked);
-      if (onBookmarkToggle) {
-        onBookmarkToggle(question.id, !isBookmarked);
-      }
-      console.log(
-        `Question ${question.id} ${isBookmarked ? "removed from" : "added to"} bookmarks`,
-      );
+      if (onBookmarkToggle) onBookmarkToggle(question.id, !isBookmarked);
     } catch (err) {
-      console.error("Failed to update bookmark:", err.message);
+      console.error("Bookmark failed:", err.message);
+      alert(err.message || "Failed to bookmark question.");
     }
   };
 
+  // Swipe handling
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const handleTouchMove = (e) => {
+    const deltaX = e.touches[0].clientX - touchStartX.current;
+    if (Math.abs(deltaX) < 100) setSwipeOffset(deltaX);
+  };
+  const handleTouchEnd = () => setSwipeOffset(0);
+
   return (
     <div
-      className="bg-kiwi-50 p-3 sm:p-4 rounded-lg shadow-md flex-1 min-w-[180px] max-w-[220px] sm:min-w-[200px] sm:max-w-[250px]"
-      role="article"
-      aria-label={`Hot question: ${question.title}`}
+      className="flex-shrink-0 snap-start relative"
+      style={{ minWidth: "190px", maxWidth: "220px" }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onMouseEnter={() => setShowPreview(true)}
+      onMouseLeave={() => setShowPreview(false)}
     >
-      {/* Question title with truncation */}
-      <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">
-        {question.title}
-      </p>
-      {/* Question metadata */}
-      <p className="text-[10px] sm:text-xs text-gray-500 mb-2">
-        Asked by {question.askedBy} • {question.answers} answers
-      </p>
-      {/* Action buttons and reactions */}
-      <div className="flex space-x-4 mt-3 items-center">
-        <Reactions
-          upvotes={question.upvotes || 0}
-          downvotes={question.downvotes || 0}
-        />
-        <Button
-          variant="kiwi"
-          size="xs"
-          smSize="sm"
-          as={Link}
+      <div
+        className="bg-kiwi-50 rounded-lg p-4 text-sm sm:text-sm flex flex-col justify-between shadow border border-[#d2eee6] h-full transition-transform duration-200"
+        style={{ transform: `translateX(${swipeOffset}px)` }}
+      >
+        <Link
           to={`/question/${question.id}`}
-          className="text-[10px] sm:text-sm"
+          className="font-medium text-gray-800 hover:underline line-clamp-2 mb-2"
+          title={question.title}
         >
-          View
-        </Button>
-        <button
-          onClick={handleBookmark}
-          className="flex items-center text-kiwi-600 text-sm hover:text-kiwi-800 font-medium"
-          aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
-        >
-          <FaBookmark
-            className={`text-lg sm:text-xl ${isBookmarked ? "text-yellow-500" : ""}`}
+          {question.title}
+        </Link>
+        <p className="text-xs text-gray-500 mb-3">
+          <span className="font-semibold">{question.askedBy}</span> •{" "}
+          {question.answers} answers
+        </p>
+        <div className="flex items-center justify-between mt-auto pt-1">
+          <Reactions
+            upvotes={question.upvotes || 0}
+            downvotes={question.downvotes || 0}
+            small
           />
-        </button>
+          <button
+            onClick={handleBookmark}
+            className="text-xl transition-transform duration-300 hover:scale-110"
+            aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+          >
+            <FaBookmark
+              className={`transition-colors duration-300 ${
+                isBookmarked ? "text-yellow-500" : "text-gray-400"
+              }`}
+            />
+          </button>
+        </div>
       </div>
+      {showPreview && (
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 bg-white border border-gray-300 shadow-lg rounded-md p-3 z-50 w-64 text-sm hidden md:block">
+          <h3 className="font-semibold text-gray-800 mb-1">{question.title}</h3>
+          <p className="text-xs text-gray-600 mb-1">
+            Asked by: <span className="font-medium">{question.askedBy}</span>
+          </p>
+          <p className="text-xs text-gray-600 mb-2">
+            {question.answers} Answers | {question.upvotes || 0} Upvotes |{" "}
+            {question.downvotes || 0} Downvotes
+          </p>
+          <Link
+            to={`/question/${question.id}`}
+            className="text-xs text-blue-600 hover:underline"
+          >
+            View full question →
+          </Link>
+        </div>
+      )}
     </div>
   );
 };

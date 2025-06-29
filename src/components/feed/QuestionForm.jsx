@@ -1,21 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../../context/useUser";
 import { motion } from "framer-motion";
 import Button from "../common/Button";
 import { FaImage } from "react-icons/fa";
 import { postQuestion } from "../../utils/api";
 
-// QuestionForm component for submitting a new question with live preview support
+// Component for submitting a new question with live preview support
 const QuestionForm = ({ onChange }) => {
+  const { user } = useUser();
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState("");
+  const [image, setImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [image, setImage] = useState(null); // State for image file
+  const [error, setError] = useState(null);
+
+  // Redirect to login if user is not authenticated
+  useEffect(() => {
+    if (!user?.id) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
 
   // Handle form submission to post the question
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!user?.id) {
+      setError("Please log in to post a question.");
+      return;
+    }
     setIsSubmitting(true);
+    setError(null);
     try {
       const tagArray = tags
         .split(",")
@@ -25,18 +42,20 @@ const QuestionForm = ({ onChange }) => {
       formData.append("title", title);
       formData.append("description", description);
       formData.append("tags", JSON.stringify(tagArray));
-      if (image) formData.append("image", image); // Append image if selected
-      await postQuestion(formData);
+      formData.append("user", user.id); // Include user ID
+      if (image) formData.append("image", image);
+      const response = await postQuestion(formData);
       alert("Question posted successfully!");
       setTitle("");
       setDescription("");
       setTags("");
       setImage(null);
       if (onChange)
-        onChange({ title: "", description: "", tags: [], image: null }); // Reset preview
+        onChange({ title: "", description: "", tags: [], image: null });
+      navigate(`/question/${response.id}`); // Redirect to the new question
     } catch (error) {
       console.error("Error posting question:", error);
-      alert("Failed to post question.");
+      setError(error.message || "Failed to post question.");
     } finally {
       setIsSubmitting(false);
     }
@@ -48,7 +67,7 @@ const QuestionForm = ({ onChange }) => {
       .split(",")
       .map((tag) => tag.trim())
       .filter(Boolean);
-    const previewImage = image ? URL.createObjectURL(image) : null; // Create temporary URL for preview
+    const previewImage = image ? URL.createObjectURL(image) : null;
     if (onChange)
       onChange({ title, description, tags: tagArray, image: previewImage });
   };
@@ -57,7 +76,7 @@ const QuestionForm = ({ onChange }) => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) setImage(file);
-    handleInputChange(); // Update preview on image selection
+    handleInputChange();
   };
 
   return (
@@ -67,7 +86,11 @@ const QuestionForm = ({ onChange }) => {
       animate={{ opacity: 1, y: 0 }}
       onSubmit={handleSubmit}
     >
-      {/* Title input field */}
+      {error && (
+        <p className="text-red-500 text-sm mb-4" role="alert">
+          {error}
+        </p>
+      )}
       <div className="mb-4">
         <label htmlFor="title" className="block text-gray-700 font-medium">
           Title
@@ -86,8 +109,6 @@ const QuestionForm = ({ onChange }) => {
           placeholder="Enter a concise question title"
         />
       </div>
-
-      {/* Description textarea */}
       <div className="mb-4">
         <label
           htmlFor="description"
@@ -109,8 +130,6 @@ const QuestionForm = ({ onChange }) => {
           placeholder="Provide details about your question"
         />
       </div>
-
-      {/* Tags input field */}
       <div className="mb-4">
         <label htmlFor="tags" className="block text-gray-700 font-medium">
           Tags (comma-separated)
@@ -128,8 +147,6 @@ const QuestionForm = ({ onChange }) => {
           placeholder="e.g., math, algebra, calculus"
         />
       </div>
-
-      {/* Submit button and image upload */}
       <div className="flex items-center space-x-4">
         <Button variant="kiwi" type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Submitting..." : "Post Question"}

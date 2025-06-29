@@ -14,9 +14,10 @@ import QuestionDetailPage from "./pages/QuestionDetailPage";
 import TrendingPage from "./pages/TrendingPage";
 import MyQuestionsPage from "./pages/MyQuestionsPage";
 import ProfilePage from "./pages/ProfilePage";
+import ProfileSetupPage from "./pages/ProfileSetupPage";
 import SearchPage from "./pages/SearchPage";
 import TopicPage from "./pages/TopicPage";
-import DashboardPage from "./pages/DashboardPage";
+import DashboardPage from "./pages/ProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
@@ -39,14 +40,15 @@ function App() {
             {/** Route for auths */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignUpPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
+            <Route path="/profilesetup" element={<ProfileSetupPage />} />
             {/** Route for logged in user interface*/}
             <Route path="/home" element={<HomePage />} />
             <Route path="/ask" element={<AskQuestionPage />} />
             <Route path="/notifications" element={<NotificationPage />} />
             <Route path="/bookmarks" element={<BookmarksPage />} />
             <Route path="/communities" element={<CommunitiesPage />} />
-            <Route path="/my-questions" element={<MyQuestionsPage />} />
+            <Route path="/myquestions" element={<MyQuestionsPage />} />
             <Route
               path="/communities/:communityId"
               element={<CommunityDetailsPage />}
