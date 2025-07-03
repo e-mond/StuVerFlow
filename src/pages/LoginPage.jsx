@@ -2,26 +2,25 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "../components/common/Button";
-import { login } from "../utils/api";
 import { Eye, EyeOff } from "lucide-react";
+import { useUser } from "../context/UserContext";
+import { login } from "../utils/api";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { login: contextLogin } = useUser(); // Destructure login
 
-  // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle form submission to log in a user
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -30,11 +29,10 @@ const LoginPage = () => {
       if (!email || !password) {
         throw new Error("Email and password are required");
       }
-
-      //  login API Request
+      console.log("Submitting login with:", { email, password }); // Debug submission
       const userData = await login({ email, password });
       console.log("Logged in user:", userData);
-
+      contextLogin(userData);
       setFormData({ email: "", password: "" });
       navigate("/home");
     } catch (error) {
@@ -47,7 +45,6 @@ const LoginPage = () => {
 
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Left side */}
       <div
         className="hidden lg:flex w-1/2 bg-cover bg-center relative"
         style={{
@@ -67,8 +64,6 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Main content with login form */}
       <div className="flex-1 flex justify-center items-center p-4 w-full lg:w-1/2">
         <motion.div
           className="bg-white p-6 rounded-lg shadow-md border border-kiwi-200 w-full max-w-lg"
@@ -76,7 +71,6 @@ const LoginPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Logo */}
           <div className="flex justify-center mb-6">
             <div
               className="text-3xl text-kiwi-700 font-bold"
@@ -85,8 +79,6 @@ const LoginPage = () => {
               StuVerFlow
             </div>
           </div>
-
-          {/* Card header with icon and description */}
           <div className="flex items-center mb-6 p-4 bg-kiwi-50 rounded-lg">
             <span className="text-2xl mr-2">🔒</span>
             <div>
@@ -98,9 +90,7 @@ const LoginPage = () => {
               </p>
             </div>
           </div>
-
           <form onSubmit={handleSubmit}>
-            {/* Email field */}
             <div className="mb-4">
               <label
                 htmlFor="email"
@@ -120,8 +110,6 @@ const LoginPage = () => {
                 placeholder="Enter your email address"
               />
             </div>
-
-            {/* Password field with visibility toggle */}
             <div className="mb-4 relative">
               <label
                 htmlFor="password"
@@ -149,13 +137,9 @@ const LoginPage = () => {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-
-            {/* Submit button */}
             <Button variant="kiwi" type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Logging in..." : "Log In"}
             </Button>
-
-            {/* Signup and Forgot Password options */}
             <div className="mt-4 text-center space-y-2">
               <p className="text-gray-600 text-sm">
                 Don’t have an account?{" "}

@@ -1,96 +1,72 @@
 import api from "./index";
 
-// Logs in a user
-export const login = async (email, password) => {
-  try {
-    if (!email || !password) throw new Error("Email and password are required");
-    const response = await api.post(
-      "/auth/login/",
-      { email, password },
-      {
-        headers: { "Content-Type": "application/json" },
-      },
-    );
-    return {
-      id: response.data.id || "",
-      name: response.data.name || "",
-      handle: response.data.handle || "",
-      token: response.data.token || "",
-    };
-  } catch (error) {
-    throw error.response?.data || { message: "Failed to login" };
-  }
+/**
+ * Login with credentials
+ */
+export const login = async ({ email, password }) => {
+  if (!email || !password) throw new Error("Email and password are required");
+
+  const response = await api.post("/user_login/", { email, password });
+
+  const user = {
+    id: response.data.id,
+    name: response.data.name,
+    handle: response.data.handle || response.data.id,
+    token: response.data.token,
+  };
+
+  return user;
 };
 
-// Signs up a new user
-export const signup = async (userData) => {
-  try {
-    if (!userData.email || !userData.password || !userData.name) {
-      throw new Error("Email, password, and name are required");
-    }
-    const response = await api.post("/auth/signup/", userData, {
-      headers: { "Content-Type": "application/json" },
-    });
-    return {
-      id: response.data.id || "",
-      name: response.data.name || userData.name,
-      handle: response.data.handle || "",
-      token: response.data.token || "",
-    };
-  } catch (error) {
-    throw error.response?.data || { message: "Failed to signup" };
+/**
+ * Register new user
+ */
+export const signup = async ({ email, password, name }) => {
+  if (!email || !password || !name) {
+    throw new Error("Email, password, and name are required");
   }
+
+  const response = await api.post("/signup/", { email, password, name });
+
+  const user = {
+    id: response.data.id,
+    name: response.data.name || name,
+    handle: response.data.handle || response.data.id,
+    token: response.data.token,
+  };
+
+  return user;
 };
 
-// Requests a password reset
+/**
+ * Request a password reset email
+ */
 export const requestPasswordReset = async (email) => {
-  try {
-    if (!email) throw new Error("Email is required");
-    const response = await api.post(
-      "/auth/reset-password/request/",
-      { email },
-      {
-        headers: { "Content-Type": "application/json" },
-      },
-    );
-    return { message: response.data.message || "Password reset email sent" };
-  } catch (error) {
-    throw (
-      error.response?.data || { message: "Failed to request password reset" }
-    );
-  }
+  if (!email) throw new Error("Email is required");
+
+  const response = await api.post("/auth/reset-password/request/", { email });
+  return { message: response.data.message || "Password reset email sent" };
 };
 
-// Resets a user's password
+/**
+ * Reset a user's password with a token
+ */
 export const resetPassword = async (token, newPassword) => {
-  try {
-    if (!token || !newPassword)
-      throw new Error("Token and new password are required");
-    const response = await api.post(
-      "/auth/reset-password/",
-      { token, newPassword },
-      {
-        headers: { "Content-Type": "application/json" },
-      },
-    );
-    return { message: response.data.message || "Password reset successfully" };
-  } catch (error) {
-    throw error.response?.data || { message: "Failed to reset password" };
-  }
+  if (!token || !newPassword)
+    throw new Error("Token and new password are required");
+
+  const response = await api.post("/auth/reset-password/", {
+    token,
+    newPassword,
+  });
+  return { message: response.data.message || "Password reset successfully" };
 };
 
-// Logs out a user
+/**
+ * Log out the current user
+ */
 export const logout = async () => {
-  try {
-    await api.post(
-      "/auth/logout/",
-      {},
-      {
-        headers: { "Content-Type": "application/json" },
-      },
-    );
-    return { message: "Logged out successfully" };
-  } catch (error) {
-    throw error.response?.data || { message: "Failed to logout" };
-  }
+  const response = await api.post("/auth/logout/", {});
+  // Optionally clear token from localStorage or context here
+  return { message: response.data.message || "Logged out successfully" };
 };

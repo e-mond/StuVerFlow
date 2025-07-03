@@ -3,11 +3,10 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "../components/common/Button";
 import { signup } from "../utils/api";
-import { useUser } from "../context/useUser";
+import { useUser } from "../context/UserContext";
 import { Eye, EyeOff } from "lucide-react";
 
 const SignUpPage = () => {
-  // Form field values
   const [formData, setFormData] = useState({
     firstName: "",
     surname: "",
@@ -16,11 +15,8 @@ const SignUpPage = () => {
     confirmPassword: "",
   });
 
-  // Toggles for showing/hiding password fields
   const [showCreatePassword, setShowCreatePassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // UI state for loading and error feedback
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordMatchError, setPasswordMatchError] = useState("");
   const [error, setError] = useState(null);
@@ -28,50 +24,61 @@ const SignUpPage = () => {
   const navigate = useNavigate();
   const { login } = useUser();
 
-  // Handles typing into form fields
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Check for password match when relevant fields are updated
     if (name === "confirmPassword" || name === "createPassword") {
+      const newPassword =
+        name === "confirmPassword" ? value : formData.confirmPassword;
+      const confirmPassword =
+        name === "createPassword" ? value : formData.createPassword;
+
       setPasswordMatchError(
-        formData.createPassword !== value &&
-          name === "confirmPassword" &&
-          value !== ""
+        newPassword && confirmPassword && newPassword !== confirmPassword
           ? "Passwords do not match"
           : "",
       );
     }
   };
 
-  // Handles form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
 
-    try {
-      const { firstName, surname, email, createPassword, confirmPassword } =
-        formData;
+    const { firstName, surname, email, createPassword, confirmPassword } =
+      formData;
 
-      // Basic validation
-      if (!firstName || !surname || !email || !createPassword) {
+    try {
+      if (
+        !firstName ||
+        !surname ||
+        !email ||
+        !createPassword ||
+        !confirmPassword
+      ) {
         throw new Error("All fields are required");
       }
+
       if (createPassword !== confirmPassword) {
         throw new Error("Passwords do not match");
       }
 
-      // Create a username from names
       const username = `${firstName.toLowerCase()}.${surname.toLowerCase()}`;
-      const signupData = { username, email, password: createPassword };
+      const name = `${firstName} ${surname}`;
 
-      // API signup request
+      const signupData = {
+        username,
+        email,
+        password: createPassword,
+        name,
+      };
+
       const userData = await signup(signupData);
-      login(userData);
+      login(userData); // Ensure context and localStorage are updated
 
-      // Clear form and redirect to profile setup
+      // Clear form
       setFormData({
         firstName: "",
         surname: "",
@@ -81,9 +88,9 @@ const SignUpPage = () => {
       });
 
       navigate("/profilesetup");
-    } catch (error) {
-      console.error("Error signing up:", error);
-      setError(error.message || "Failed to sign up. Please try again.");
+    } catch (err) {
+      console.error("Error signing up:", err);
+      setError(err.message || "Failed to sign up. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -91,7 +98,7 @@ const SignUpPage = () => {
 
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Left image panel (only visible on large screens) */}
+      {/* Left section with image */}
       <div
         className="hidden lg:flex w-full lg:w-1/2 bg-cover bg-center relative"
         style={{
@@ -99,7 +106,6 @@ const SignUpPage = () => {
             "url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80')",
         }}
       >
-        {/* Overlay with branding message */}
         <div className="absolute inset-0 bg-white/30 backdrop-blur-md flex flex-col justify-center items-center p-4 lg:p-8">
           <div className="flex items-center p-6 lg:p-10 bg-kiwi-50 rounded-lg max-w-md w-full">
             <div>
@@ -116,7 +122,7 @@ const SignUpPage = () => {
         </div>
       </div>
 
-      {/* Right form panel */}
+      {/* Right section with form */}
       <div className="flex-1 flex justify-center items-center p-4 sm:p-6 w-full lg:w-1/2">
         <motion.div
           className="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-kiwi-200 w-full max-w-md sm:max-w-lg"
@@ -131,23 +137,20 @@ const SignUpPage = () => {
             StuVerFlow
           </div>
 
-          {/* Section title */}
           <div className="flex items-center mb-4 sm:mb-6 p-4 bg-kiwi-50 rounded-lg">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
               Create Account
             </h2>
           </div>
 
-          {/* Global form error */}
           {error && (
             <p className="text-red-500 text-sm sm:text-base mb-4" role="alert">
               {error}
             </p>
           )}
 
-          {/* Signup form */}
           <form onSubmit={handleSubmit}>
-            {/* First Name + Surname (side by side) */}
+            {/* Name fields */}
             <div className="mb-4 flex flex-col sm:flex-row gap-4">
               <div className="w-full sm:w-1/2">
                 <label
@@ -167,6 +170,7 @@ const SignUpPage = () => {
                   placeholder="Enter your first name"
                 />
               </div>
+
               <div className="w-full sm:w-1/2">
                 <label
                   htmlFor="surname"
@@ -187,7 +191,7 @@ const SignUpPage = () => {
               </div>
             </div>
 
-            {/* Email field */}
+            {/* Email */}
             <div className="mb-4">
               <label
                 htmlFor="email"
@@ -207,7 +211,7 @@ const SignUpPage = () => {
               />
             </div>
 
-            {/* Create Password with visibility toggle */}
+            {/* Create password */}
             <div className="mb-4 relative">
               <label
                 htmlFor="createPassword"
@@ -225,7 +229,6 @@ const SignUpPage = () => {
                 required
                 placeholder="Create a password"
               />
-              {/* Toggle button */}
               <button
                 type="button"
                 onClick={() => setShowCreatePassword(!showCreatePassword)}
@@ -236,7 +239,7 @@ const SignUpPage = () => {
               </button>
             </div>
 
-            {/* Confirm Password with visibility toggle */}
+            {/* Confirm password */}
             <div className="mb-4 relative">
               <label
                 htmlFor="confirmPassword"
@@ -254,7 +257,6 @@ const SignUpPage = () => {
                 required
                 placeholder="Confirm your password"
               />
-              {/* Toggle button */}
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -263,7 +265,6 @@ const SignUpPage = () => {
               >
                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
-              {/* Password mismatch warning */}
               {passwordMatchError && (
                 <p className="text-red-600 text-sm mt-1">
                   {passwordMatchError}
@@ -281,7 +282,7 @@ const SignUpPage = () => {
               {isSubmitting ? "Submitting..." : "Sign Up"}
             </Button>
 
-            {/* Link to login page */}
+            {/* Navigation */}
             <div className="mt-4 text-center">
               <p className="text-gray-600 text-sm sm:text-base">
                 Already have an account?{" "}

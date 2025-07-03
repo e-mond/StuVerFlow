@@ -1,8 +1,5 @@
-import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import { updateUserProfile } from "../utils/api";
-import { useUser } from "../context/useUser";
+import { useProfileForm } from "../hooks/useProfileForm";
 import UserTypeStep from "../components/profilesetup/UserTypeStep";
 import BasicDetailsStep from "../components/profilesetup/BasicDetailsStep";
 import StudentDetailsStep from "../components/profilesetup/StudentDetailsStep";
@@ -12,159 +9,21 @@ import FileUploadStep from "../components/profilesetup/FileUploadStep";
 import SuccessStep from "../components/profilesetup/SuccessStep";
 
 const ProfileSetupPage = () => {
-  const [step, setStep] = useState(1);
-  const [userType, setUserType] = useState("student");
-  const [formData, setFormData] = useState({
-    dob: "",
-    bio: "",
-    interests: "",
-    profilePicture: null,
-    handle: "",
-    institution: "",
-    title: "",
-    expertise: "",
-    certifications: "",
-    certificateFile1: null,
-    certificateFile2: null,
-    certificateFile3: null,
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
-  const { user } = useUser();
-
-  // Redirect to login if user is not authenticated
-  useEffect(() => {
-    if (!user?.id) {
-      navigate("/login");
-    }
-  }, [user, navigate]);
-
-  // Generate random handle on mount
-  useEffect(() => {
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    const generatedHandle = `@user${randomNum}`;
-    setFormData((prev) => ({ ...prev, handle: generatedHandle }));
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "profilePicture" || name.startsWith("certificateFile")) {
-      const file = files[0];
-      if (file) {
-        if (
-          name === "profilePicture" &&
-          !["image/jpeg", "image/png"].includes(file.type)
-        ) {
-          setError("Profile picture must be a JPEG or PNG file");
-          e.target.value = null; // Reset file input
-          return;
-        }
-        if (
-          name.startsWith("certificateFile") &&
-          file.type !== "application/pdf"
-        ) {
-          setError(`Certificate ${name.slice(-1)} must be a PDF file`);
-          e.target.value = null; // Reset file input
-          return;
-        }
-        if (
-          file.size >
-          (name === "profilePicture" ? 2 * 1024 * 1024 : 5 * 1024 * 1024)
-        ) {
-          setError(
-            `File size for ${name === "profilePicture" ? "profile picture" : `certificate ${name.slice(-1)}`} must be less than ${name === "profilePicture" ? "2MB" : "5MB"}`,
-          );
-          e.target.value = null; // Reset file input
-          return;
-        }
-      }
-      setFormData((prev) => ({ ...prev, [name]: file }));
-    } else {
-      if (name === "handle" && value && !value.startsWith("@")) {
-        setError("Handle must start with @");
-        return;
-      }
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-    setError(null);
-  };
-
-  const nextStep = () => setStep((prev) => prev + 1);
-  const prevStep = () => setStep((prev) => prev - 1);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-    try {
-      const {
-        dob,
-        bio,
-        interests,
-        profilePicture,
-        handle,
-        institution,
-        title,
-        expertise,
-        certifications,
-        certificateFile1,
-        certificateFile2,
-        certificateFile3,
-      } = formData;
-
-      const profileData = {
-        userType,
-        handle,
-        institution,
-        dob: dob || null,
-        bio: bio || null,
-        ...(userType === "student" && { interests }),
-        ...(userType === "professional" && {
-          title,
-          expertise,
-          certifications,
-          certificateFiles: [
-            certificateFile1,
-            certificateFile2,
-            certificateFile3,
-          ].filter(Boolean),
-        }),
-        ...(profilePicture && { profilePicture }),
-      };
-
-      await updateUserProfile(user.id, profileData);
-
-      setFormData({
-        dob: "",
-        bio: "",
-        interests: "",
-        profilePicture: null,
-        handle: "",
-        institution: "",
-        title: "",
-        expertise: "",
-        certifications: "",
-        certificateFile1: null,
-        certificateFile2: null,
-        certificateFile3: null,
-      });
-
-      if (userType === "student") {
-        navigate("/home");
-      } else {
-        setStep(6);
-      }
-    } catch (error) {
-      console.error("Error setting up profile:", error);
-      setError(error.message || "Failed to set up profile. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const progressSteps = userType === "student" ? 3 : 6;
-  const progressWidth = `${(step / progressSteps) * 100}%`;
+  const {
+    step,
+    userType,
+    formData,
+    isSubmitting,
+    error,
+    progressSteps,
+    progressWidth,
+    handleChange,
+    nextStep,
+    prevStep,
+    handleSubmit,
+    navigate,
+    setUserType,
+  } = useProfileForm();
 
   return (
     <div
@@ -188,6 +47,7 @@ const ProfileSetupPage = () => {
           >
             StuVerFlow
           </div>
+
           {step === 1 && (
             <div className="text-center mb-6">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center justify-center gap-2">
@@ -198,6 +58,8 @@ const ProfileSetupPage = () => {
               </p>
             </div>
           )}
+
+          {/* Progress Bar */}
           <div className="mb-6">
             <div className="w-full bg-gray-200 rounded-full h-2">
               <motion.div
@@ -212,6 +74,7 @@ const ProfileSetupPage = () => {
               Step {step} of {progressSteps}
             </p>
           </div>
+
           {error && (
             <p
               className="text-red-500 text-sm sm:text-base mb-4 text-center"
@@ -220,6 +83,8 @@ const ProfileSetupPage = () => {
               {error}
             </p>
           )}
+
+          {/* Steps */}
           <AnimatePresence mode="wait">
             {step === 1 && (
               <UserTypeStep
@@ -228,6 +93,7 @@ const ProfileSetupPage = () => {
                 nextStep={nextStep}
               />
             )}
+
             {step === 2 && (
               <BasicDetailsStep
                 formData={formData}
@@ -236,6 +102,7 @@ const ProfileSetupPage = () => {
                 nextStep={nextStep}
               />
             )}
+
             {step === 3 && userType === "student" && (
               <StudentDetailsStep
                 formData={formData}
@@ -245,6 +112,7 @@ const ProfileSetupPage = () => {
                 isSubmitting={isSubmitting}
               />
             )}
+
             {step === 3 && userType === "professional" && (
               <ProfessionalDetailsStep
                 formData={formData}
@@ -253,6 +121,7 @@ const ProfileSetupPage = () => {
                 nextStep={nextStep}
               />
             )}
+
             {step === 4 && userType === "professional" && (
               <ProfessionalBioCertStep
                 formData={formData}
@@ -261,6 +130,7 @@ const ProfileSetupPage = () => {
                 nextStep={nextStep}
               />
             )}
+
             {step === 5 && userType === "professional" && (
               <FileUploadStep
                 formData={formData}
@@ -270,6 +140,7 @@ const ProfileSetupPage = () => {
                 isSubmitting={isSubmitting}
               />
             )}
+
             {step === 6 && userType === "professional" && (
               <SuccessStep navigate={navigate} />
             )}

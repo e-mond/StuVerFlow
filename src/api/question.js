@@ -40,9 +40,9 @@ export const fetchQuestions = async (topic = "") => {
         downvotes: answer.downvotes || 0,
       })),
       isBookmarked: question.isBookmarked || false,
-    })); // Returns array of question objects
+    }));
   } catch (error) {
-    throw error.response?.data || { message: "Failed to fetch questions" }; // Throws error with message
+    throw error.response?.data || { message: "Failed to fetch questions" };
   }
 };
 
@@ -86,9 +86,9 @@ export const fetchQuestionById = async (questionId) => {
         downvotes: answer.downvotes || 0,
       })),
       isBookmarked: response.data.isBookmarked || false,
-    }; // Returns question object
+    };
   } catch (error) {
-    throw error.response?.data || { message: "Failed to fetch question" }; // Throws error with message
+    throw error.response?.data || { message: "Failed to fetch question" };
   }
 };
 
@@ -124,9 +124,9 @@ export const postQuestion = async (userId, questionData) => {
       downvotes: response.data.downvotes || 0,
       answers: [],
       isBookmarked: false,
-    }; // Returns created question object
+    };
   } catch (error) {
-    throw error.response?.data || { message: "Failed to post question" }; // Throws error with message
+    throw error.response?.data || { message: "Failed to post question" };
   }
 };
 
@@ -154,18 +154,16 @@ export const postAnswer = async (questionId, userId, answerData) => {
       created_at: response.data.created_at || new Date().toISOString(),
       upvotes: response.data.upvotes || 0,
       downvotes: response.data.downvotes || 0,
-    }; // Returns created answer object
+    };
   } catch (error) {
-    throw error.response?.data || { message: "Failed to post answer" }; // Throws error with message
+    throw error.response?.data || { message: "Failed to post answer" };
   }
 };
 
 // Fetches hot questions
 export const fetchHotQuestions = async () => {
   try {
-    const response = await api.get("/questions/hot/", {
-      headers: { "Content-Type": "application/json" },
-    });
+    const response = await api.get("/questions/hot/");
     return response.data.map((question) => ({
       id: question.id || `${Date.now()}`,
       title: question.title || "",
@@ -197,9 +195,9 @@ export const fetchHotQuestions = async () => {
         downvotes: answer.downvotes || 0,
       })),
       isBookmarked: question.isBookmarked || false,
-    })); // Returns array of hot question objects
+    }));
   } catch (error) {
-    throw error.response?.data || { message: "Failed to fetch hot questions" }; // Throws error with message
+    throw error.response?.data || { message: "Failed to fetch hot questions" };
   }
 };
 
@@ -241,13 +239,13 @@ export const fetchQuestionsByInterests = async (userId) => {
         downvotes: answer.downvotes || 0,
       })),
       isBookmarked: question.isBookmarked || false,
-    })); // Returns array of interest-based question objects
+    }));
   } catch (error) {
     throw (
       error.response?.data || {
         message: "Failed to fetch questions by interests",
       }
-    ); // Throws error with message
+    );
   }
 };
 
@@ -292,9 +290,9 @@ export const searchQuestions = async (query) => {
         downvotes: answer.downvotes || 0,
       })),
       isBookmarked: question.isBookmarked || false,
-    })); // Returns array of search result question objects
+    }));
   } catch (error) {
-    throw error.response?.data || { message: "Failed to search questions" }; // Throws error with message
+    throw error.response?.data || { message: "Failed to search questions" };
   }
 };
 
@@ -307,9 +305,9 @@ export const deleteQuestion = async (questionId, userId) => {
       headers: { "Content-Type": "application/json" },
       data: { userId },
     });
-    return { message: "Question deleted successfully" }; // Returns success message
+    return { message: "Question deleted successfully" };
   } catch (error) {
-    throw error.response?.data || { message: "Failed to delete question" }; // Throws error with message
+    throw error.response?.data || { message: "Failed to delete question" };
   }
 };
 
@@ -358,9 +356,9 @@ export const editQuestion = async (questionId, userId, updatedData) => {
         downvotes: answer.downvotes || 0,
       })),
       isBookmarked: response.data.isBookmarked || false,
-    }; // Returns updated question object
+    };
   } catch (error) {
-    throw error.response?.data || { message: "Failed to edit question" }; // Throws error with message
+    throw error.response?.data || { message: "Failed to edit question" };
   }
 };
 
@@ -378,9 +376,9 @@ export const archiveQuestion = async (questionId, userId) => {
     );
     return {
       message: response.data.message || "Question archived successfully",
-    }; // Returns success message
+    };
   } catch (error) {
-    throw error.response?.data || { message: "Failed to archive question" }; // Throws error with message
+    throw error.response?.data || { message: "Failed to archive question" };
   }
 };
 
@@ -399,8 +397,8 @@ export const reportQuestion = async (questionId, userId, reason) => {
     );
     return {
       message: response.data.message || "Question reported successfully",
-    }; // Returns success message
+    };
   } catch (error) {
-    throw error.response?.data || { message: "Failed to report question" }; // Throws error with message
+    throw error.response?.data || { message: "Failed to report question" };
   }
 };
