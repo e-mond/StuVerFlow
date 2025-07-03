@@ -3,17 +3,19 @@ import { getUserToken } from "../utils/authUtils";
 
 // Create Axios instance
 const api = axios.create({
-  baseURL: "http://localhost:8000/api/", // Added trailing slash
+  baseURL: "http://localhost:8000/api/", // Ensure trailing slash
   timeout: 10000, // 10-second timeout
 });
 
-// Automatically attach token if available, excluding login endpoint
+// Automatically attach token if available, excluding login and logout endpoints
 api.interceptors.request.use(
   (config) => {
     const token = getUserToken();
     const isLoginRequest =
-      config.url === "user_login/" || config.url === "/user_login/"; // Match with or without leading slash
-    if (token && !isLoginRequest) {
+      config.url === "user_login/" || config.url === "/user_login/";
+    const isLogoutRequest =
+      config.url === "logout/" || config.url === "/logout/"; // Add logout exclusion
+    if (token && !isLoginRequest && !isLogoutRequest) {
       config.headers.Authorization = `Token ${token}`; // Use 'Token' scheme
       if (config.data instanceof FormData) {
         config.headers["Content-Type"] = "multipart/form-data"; // Explicitly set for FormData
