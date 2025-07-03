@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FaArrowUp, FaArrowDown } from "react-icons/fa";
 import { voteOnQuestion, voteOnAnswer } from "../../utils/api";
-import { useUser } from "../../context/useUser";
+import { useUser } from "../../context/UserContext";
 
 const Reactions = ({ upvotes, downvotes, questionId, answerId }) => {
   const [userUpvoted, setUserUpvoted] = useState(false);

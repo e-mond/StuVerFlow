@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useState, useRef } from "react";
 import { FaBookmark } from "react-icons/fa";
 import { bookmarkQuestion } from "../../utils/api";
-import { useUser } from "../../context/useUser";
+import { useUser } from "../../context/UserContext";
 import Reactions from "../feed/Reactions";
 
 const HotQuestionCard = ({ question, onBookmarkToggle }) => {

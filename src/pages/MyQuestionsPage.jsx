@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../context/useUser";
+import { useUser } from "../context/UserContext";
 import { Link } from "react-router-dom";
 import Sidebar from "../components/common/Sidebar";
 import HotQuestionCard from "../components/explore/HotQuestionCard";

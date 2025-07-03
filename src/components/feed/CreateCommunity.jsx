@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useUser } from "../../context/useUser";
+import { useUser } from "../../context/UserContext";
 import Button from "../common/Button";
 import { createCommunity } from "../../utils/api";
 

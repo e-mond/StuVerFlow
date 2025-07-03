@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useUser } from "../context/useUser";
+import { useUser } from "../context/UserContext";
 import Sidebar from "../components/common/Sidebar";
 import Button from "../components/common/Button";
 import QuestionCard from "../components/feed/QuestionCard";

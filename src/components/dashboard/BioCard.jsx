@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useUser } from "../../context/useUser";
+import { useUser } from "../../context/UserContext";
 import { getUserProfile, updateUserProfile } from "../../utils/api";
 
 const BioCard = ({ onEdit }) => {

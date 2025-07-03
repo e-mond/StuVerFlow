@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { useUser } from "../context/useUser";
+import { useUser } from "../context/UserContext";
 import Button from "../components/common/Button";
 import { getUserProfile } from "../utils/api";
 

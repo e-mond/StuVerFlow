@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../context/useUser";
+import { useUser } from "../context/UserContext";
 import QuestionForm from "../components/feed/QuestionForm";
 import Sidebar from "../components/common/Sidebar";
 import { FaCommentAlt } from "react-icons/fa";

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useUser } from "../../context/useUser";
+import { useUser } from "../../context/UserContext";
 import { postAnswer } from "../../utils/api";
 
 const CommentsModal = ({ isOpen, onClose, answers, onReply, questionId }) => {

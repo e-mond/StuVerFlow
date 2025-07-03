@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify"; // Verify this import
 import {
   FaHome,
   FaPen,
@@ -16,7 +17,7 @@ import {
   FaChevronRight,
 } from "react-icons/fa";
 import logo from "../../assets/logo/StuVerFlow3.png";
-import { useUser } from "../../context/useUser";
+import { useUser } from "../../context/UserContext";
 import { getUserProfile, logout } from "../../utils/api";
 
 const Sidebar = () => {
@@ -66,11 +67,15 @@ const Sidebar = () => {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      const response = await logout();
       setUser(null);
-      navigate("/login");
+      localStorage.removeItem("token"); // Ensure token is cleared
+      toast.success(response.message || "Logged out successfully!"); // Test toast
+      navigate("/login"); // Test immediate navigation
+      console.log("Logout completed, redirecting to /login"); // Debug log
     } catch (err) {
-      setError(err.message || "Failed to logout");
+      setError(err.message || "Failed to logout. Please try again.");
+      console.error("Logout error:", err); // Debug error
     }
   };
 
