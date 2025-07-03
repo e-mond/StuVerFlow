@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useUser } from "../context/useUser";
+import { useUser } from "../context/UserContext";
 import Sidebar from "../components/common/Sidebar";
 import QuestionCard from "../components/feed/QuestionCard";
 import { fetchQuestions, fetchTopic } from "../utils/api";

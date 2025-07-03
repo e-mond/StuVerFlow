@@ -10,7 +10,7 @@ import {
   archiveQuestion,
   reportQuestion,
 } from "../../utils/api";
-import { useUser } from "../../context/useUser";
+import { useUser } from "../../context/UserContext";
 
 const QuestionCard = ({ question, onBookmarkToggle }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);

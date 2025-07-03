@@ -7,8 +7,10 @@ import ProfessionalDetailsStep from "../components/profilesetup/ProfessionalDeta
 import ProfessionalBioCertStep from "../components/profilesetup/ProfessionalBioCertStep";
 import FileUploadStep from "../components/profilesetup/FileUploadStep";
 import SuccessStep from "../components/profilesetup/SuccessStep";
+import { useNavigate } from "react-router-dom";
 
 const ProfileSetupPage = () => {
+  const navigate = useNavigate();
   const {
     step,
     userType,
@@ -21,9 +23,10 @@ const ProfileSetupPage = () => {
     nextStep,
     prevStep,
     handleSubmit,
-    navigate,
     setUserType,
   } = useProfileForm();
+
+  if (!step) return <div>Loading...</div>; // Show loading if step is not yet set
 
   return (
     <div

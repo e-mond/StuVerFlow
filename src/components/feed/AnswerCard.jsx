@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { FaArrowCircleUp, FaArrowCircleDown } from "react-icons/fa";
 import Button from "../common/Button";
 import { useState } from "react";
-import { useUser } from "../../context/useUser";
+import { useUser } from "../../context/UserContext";
 import { voteOnAnswer } from "../../utils/api";
 
 // AnswerCard component to display individual answers with voting functionality

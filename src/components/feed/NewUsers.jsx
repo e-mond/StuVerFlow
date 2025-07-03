@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaUserPlus, FaArrowUp, FaArrowDown } from "react-icons/fa";
-import { useUser } from "../../context/useUser";
+import { useUser } from "../../context/UserContext";
 import { fetchNewUsers, followUser } from "../../utils/api";
 
 /**

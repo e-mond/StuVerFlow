@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify"; // Import toast for notifications
 import Button from "../components/common/Button";
 import { Eye, EyeOff } from "lucide-react";
 import { useUser } from "../context/UserContext";
-import { login } from "../utils/api";
+import { login } from "../api/auth";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -14,13 +15,21 @@ const LoginPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const { login: contextLogin } = useUser(); // Destructure login
+  const { login: contextLogin } = useUser(); // Destructure login from context
 
+  /**
+   * Handles input changes for email and password fields
+   * @param {React.ChangeEvent<HTMLInputElement>} e - The input change event
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  /**
+   * Handles form submission for login
+   * @param {React.FormEvent<HTMLFormElement>} e - The form submission event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -31,20 +40,24 @@ const LoginPage = () => {
       }
       console.log("Submitting login with:", { email, password }); // Debug submission
       const userData = await login({ email, password });
-      console.log("Logged in user:", userData);
-      contextLogin(userData);
-      setFormData({ email: "", password: "" });
-      navigate("/home");
+      console.log("Logged in user:", userData); // Debug successful login
+      contextLogin(userData); // Update user context
+      setFormData({ email: "", password: "" }); // Clear form
+      toast.success("Login successful!"); // Notify user of success
+      navigate("/home"); // Redirect to home page
     } catch (error) {
-      console.error("Error logging in:", error);
-      alert(error.message || "Failed to log in.");
+      console.error("Error logging in:", error); // Log error for debugging
+      const errorMessage =
+        error.response?.data?.message || error.message || "Failed to log in.";
+      toast.error(errorMessage); // Display specific error to user
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // Reset submitting state
     }
   };
 
   return (
     <div className="flex min-h-screen bg-white">
+      {/* Background image section for larger screens */}
       <div
         className="hidden lg:flex w-1/2 bg-cover bg-center relative"
         style={{
@@ -64,13 +77,15 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
+      {/* Login form section */}
       <div className="flex-1 flex justify-center items-center p-4 w-full lg:w-1/2">
         <motion.div
           className="bg-white p-6 rounded-lg shadow-md border border-kiwi-200 w-full max-w-lg"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          initial={{ opacity: 0, y: 20 }} // Initial animation state
+          animate={{ opacity: 1, y: 0 }} // Animated state
+          transition={{ duration: 0.5 }} // Animation duration
         >
+          {/* Logo */}
           <div className="flex justify-center mb-6">
             <div
               className="text-3xl text-kiwi-700 font-bold"
@@ -79,6 +94,7 @@ const LoginPage = () => {
               StuVerFlow
             </div>
           </div>
+          {/* Welcome message */}
           <div className="flex items-center mb-6 p-4 bg-kiwi-50 rounded-lg">
             <span className="text-2xl mr-2">🔒</span>
             <div>
@@ -90,7 +106,8 @@ const LoginPage = () => {
               </p>
             </div>
           </div>
-          <form onSubmit={handleSubmit}>
+          {/* Login form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="mb-4">
               <label
                 htmlFor="email"
@@ -133,13 +150,20 @@ const LoginPage = () => {
                 onClick={() => setShowPassword((prev) => !prev)}
                 className="absolute top-9 right-3 text-gray-500"
                 tabIndex={-1}
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-            <Button variant="kiwi" type="submit" disabled={isSubmitting}>
+            <Button
+              variant="kiwi"
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full"
+            >
               {isSubmitting ? "Logging in..." : "Log In"}
             </Button>
+            {/* Additional links */}
             <div className="mt-4 text-center space-y-2">
               <p className="text-gray-600 text-sm">
                 Don’t have an account?{" "}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useUser } from "../context/useUser";
+import { useUser } from "../context/UserContext";
 import NotificationItem from "../components/common/NotificationItem";
 import { fetchNotifications, markAllNotificationsAsRead } from "../utils/api";
 import Sidebar from "../components/common/Sidebar";

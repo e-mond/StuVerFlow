@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { updateUserProfile } from "../api/profiles";
-import { useUser } from "../context/UserContext"; // Assuming useUpdateUser from previous update
+import { useUser } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 
 export const useProfileForm = () => {
+  const { user, login } = useUser(); // Call hook at top level
+  const navigate = useNavigate();
+
+  const [isLoading, setIsLoading] = useState(!user?.id); // Initial loading based on user presence
   const [step, setStep] = useState(1);
   const [userType, setUserType] = useState("student");
   const [formData, setFormData] = useState({
@@ -23,22 +27,20 @@ export const useProfileForm = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const { user, login } = useUser(); // Use login to update context
-  // Use for partial updates
-  const navigate = useNavigate();
 
-  // Redirect to login if user is not present
   useEffect(() => {
-    if (!user?.id) navigate("/login");
+    if (!user?.id) {
+      navigate("/login");
+      setIsLoading(false); // End loading on redirect
+    } else {
+      setIsLoading(false);
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      setFormData((prev) => ({ ...prev, handle: `@user${randomNum}` }));
+    }
   }, [user, navigate]);
 
-  // Generate a handle on mount
-  useEffect(() => {
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    setFormData((prev) => ({ ...prev, handle: `@user${randomNum}` }));
-  }, []);
-
   const handleChange = (e) => {
+    if (isLoading) return;
     const { name, value, files } = e.target;
     if (files?.[0]) {
       const file = files[0];
@@ -79,6 +81,7 @@ export const useProfileForm = () => {
   const prevStep = () => setStep((prev) => prev - 1);
 
   const handleSubmit = async (e) => {
+    if (isLoading) return;
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
@@ -98,8 +101,23 @@ export const useProfileForm = () => {
         certificateFile3,
       } = formData;
 
-      // ✅ Require at least one certificate for professionals
+      const profileData = new FormData();
+      profileData.append("userType", userType || "student");
+      console.log("Debug: userType before append:", userType);
+      for (let pair of profileData.entries()) {
+        console.log("FormData entry:", pair[0], pair[1]);
+      }
+      profileData.append("handle", handle);
+      profileData.append("institution", institution);
+      if (dob) profileData.append("dob", dob);
+      if (bio) profileData.append("bio", bio);
+      if (userType === "student" && interests)
+        profileData.append("interests", interests);
       if (userType === "professional") {
+        if (title) profileData.append("title", title);
+        if (expertise) profileData.append("expertise", expertise);
+        if (certifications)
+          profileData.append("certifications", certifications);
         const certs = [
           certificateFile1,
           certificateFile2,
@@ -108,51 +126,34 @@ export const useProfileForm = () => {
         if (certs.length === 0) {
           throw new Error("Please upload at least one certificate (PDF).");
         }
+        certs.forEach((file) => profileData.append("certificateFiles", file));
       }
-
-      const profileData = {
-        userType,
-        handle,
-        institution,
-        dob: dob || null,
-        bio: bio || null,
-        ...(userType === "student" && { interests }),
-        ...(userType === "professional" && {
-          title,
-          expertise,
-          certifications,
-          certificateFiles: [
-            certificateFile1,
-            certificateFile2,
-            certificateFile3,
-          ].filter(Boolean),
-        }),
-        ...(profilePicture && { profilePicture }),
-        name:
-          `${user.first_name || ""} ${user.last_name || ""}`.trim() ||
+      if (profilePicture) profileData.append("profilePicture", profilePicture);
+      profileData.append(
+        "name",
+        `${user?.first_name || ""} ${user?.last_name || ""}`.trim() ||
           "Unknown User",
-      };
+      );
 
-      console.log("Submitting profile data:", profileData);
+      console.log("Submitting profile data:", Object.fromEntries(profileData));
       const response = await updateUserProfile(user.id, profileData);
 
       if (response?.message) {
-        // Update context with the full user data including the new token if provided
-        login({
-          id: response.id || user.id,
-          name: response.name || user.name,
-          handle: response.handle || user.handle,
-          institution: response.institution || user.institution,
-          token: response.token || user.token, // Use new token if available
-        });
-
-        toast.success("Profile setup completed successfully!");
-
-        if (userType === "student" && step === 3) {
-          navigate("/home");
-        } else if (userType === "professional" && step === 5) {
-          setStep(6); // Show success step
-        }
+        const updatedUser = {
+          id: response.data.id || user.id,
+          name: response.data.name || user.name,
+          handle: response.data.data?.handle || formData.handle || user.handle,
+          token: user.token,
+        };
+        login(updatedUser);
+        setTimeout(() => {
+          toast.success("Profile setup completed successfully!");
+          if (userType === "student" && step === 3) {
+            navigate("/home");
+          } else if (userType === "professional" && step === 5) {
+            setStep(6);
+          }
+        }, 0);
       } else {
         throw new Error("Unexpected response from server");
       }

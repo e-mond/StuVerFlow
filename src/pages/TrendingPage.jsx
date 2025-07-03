@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useUser } from "../context/useUser";
+import { useUser } from "../context/UserContext";
 import Sidebar from "../components/common/Sidebar";
 import TrendingTagCard from "../components/feed/TrendingTagCard";
 import HotQuestionCard from "../components/explore/HotQuestionCard";

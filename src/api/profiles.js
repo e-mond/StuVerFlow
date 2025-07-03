@@ -1,46 +1,37 @@
 import api from "./index";
 
-// PROFILE HELPERS
 export const updateUserProfile = async (userId, updatedData) => {
   if (!userId) throw new Error("User ID is required");
 
-  const {
-    userType,
-    handle,
-    institution,
-    profilePicture,
-    certificateFiles,
-    dob,
-    bio,
-    interests,
-    title,
-    expertise,
-    certifications,
-    name,
-    firstName,
-    lastName,
-  } = updatedData;
+  // updatedData is FormData, so we need to access its entries
+  const formData =
+    updatedData instanceof FormData ? updatedData : new FormData();
+  const userType = formData.get("userType"); // Get userType from FormData
+  console.log("Debug: Received userType:", userType);
 
   // Validation
-  if (!userType || !["student", "professional"].includes(userType)) {
-    throw new Error("Invalid user type");
+  if (
+    !userType ||
+    !["student", "professional"].includes(userType.toLowerCase().trim())
+  ) {
+    throw new Error("Invalid userType");
   }
-  if (!handle?.startsWith("@")) {
+  if (!formData.get("handle")?.startsWith("@")) {
     throw new Error("Handle must start with '@'");
   }
-  if (!institution) {
+  if (!formData.get("institution")) {
     throw new Error("Institution is required");
   }
-  if (userType === "student" && !interests) {
+  if (userType.toLowerCase() === "student" && !formData.get("interests")) {
     throw new Error("Students must provide interests");
   }
   if (
-    userType === "professional" &&
-    (!title ||
-      !expertise ||
-      !bio ||
-      !certifications ||
-      !certificateFiles?.length)
+    userType.toLowerCase() === "professional" &&
+    (!formData.get("title") ||
+      !formData.get("expertise") ||
+      !formData.get("bio") ||
+      !formData.get("certifications") ||
+      !formData.getAll("certificateFiles").length)
   ) {
     throw new Error(
       "Professionals must provide title, expertise, bio, certifications, and at least one certificate file",
@@ -61,52 +52,14 @@ export const updateUserProfile = async (userId, updatedData) => {
     "PMP",
     "Other",
   ];
-  if (userType === "professional" && !validTitles.includes(title)) {
+  if (
+    userType.toLowerCase() === "professional" &&
+    !validTitles.includes(formData.get("title"))
+  ) {
     throw new Error("Invalid professional title");
   }
 
-  // Construct FormData
-  const formData = new FormData();
-  formData.append("userType", userType);
-  formData.append("handle", handle);
-  formData.append("institution", institution);
-  if (dob) formData.append("dob", dob);
-  if (bio) formData.append("bio", bio);
-
-  if (userType === "student") {
-    formData.append("interests", interests);
-  }
-
-  if (userType === "professional") {
-    formData.append("title", title);
-    formData.append("expertise", expertise);
-    formData.append("certifications", certifications);
-    certificateFiles.forEach((file, i) => {
-      if (file.type !== "application/pdf") {
-        throw new Error(`Certificate file ${i + 1} must be a PDF`);
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error(`Certificate file ${i + 1} must be under 5MB`);
-      }
-      formData.append(`certificateFiles[${i}]`, file);
-    });
-  }
-
-  if (profilePicture) {
-    if (!["image/jpeg", "image/png"].includes(profilePicture.type)) {
-      throw new Error("Profile picture must be JPEG or PNG");
-    }
-    if (profilePicture.size > 2 * 1024 * 1024) {
-      throw new Error("Profile picture must be under 2MB");
-    }
-    formData.append("profilePicture", profilePicture);
-  }
-
-  formData.append(
-    "name",
-    name || `${firstName || ""} ${lastName || ""}`.trim(),
-  );
-
+  // No need to reconstruct FormData, use the input directly
   const response = await api.put(`/users/${userId}/`, formData);
   return {
     ...response.data,
@@ -114,6 +67,7 @@ export const updateUserProfile = async (userId, updatedData) => {
   };
 };
 
+// Rest of the exports (getUserProfile, etc.) remain unchanged
 export const getUserProfile = async (userId) => {
   if (!userId) throw new Error("User ID is required");
 

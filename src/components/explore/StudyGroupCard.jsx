@@ -1,6 +1,6 @@
 import Button from "../common/Button";
 import { useState } from "react";
-import { useUser } from "../../context/useUser";
+import { useUser } from "../../context/UserContext";
 import { joinCommunity } from "../../utils/api";
 
 const StudyGroupCard = ({ group }) => {

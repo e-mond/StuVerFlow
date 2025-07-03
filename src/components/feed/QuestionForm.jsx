@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../../context/useUser";
+import { useUser } from "../../context/UserContext";
 import { motion } from "framer-motion";
 import Button from "../common/Button";
 import { FaImage } from "react-icons/fa";

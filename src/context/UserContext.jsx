@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
-// Create the user context
+// Create the User context
 const UserContext = createContext();
 
 // Provider to wrap your app and expose user state
