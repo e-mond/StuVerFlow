@@ -18,7 +18,7 @@ import {
 } from "react-icons/fa";
 import logo from "../../assets/logo/StuVerFlow3.png";
 import { useUser } from "../../context/UserContext";
-import { getUserProfile, logout } from "../../utils/api";
+import { getUserProfile, logout as apiLogout } from "../../utils/api"; // Rename to avoid conflict
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,7 +34,17 @@ const Sidebar = () => {
   const [error, setError] = useState(null);
   const sidebarRef = useRef(null);
   const navigate = useNavigate();
-  const { user, setUser } = useUser();
+  const { user, logout } = useUser(); // Use logout from context instead of setUser
+
+  // Debug context
+  useEffect(() => {
+    if (!logout || typeof logout !== "function") {
+      console.error("useUser hook did not provide logout function:", {
+        user,
+        logout,
+      });
+    }
+  }, [user, logout]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -67,15 +77,18 @@ const Sidebar = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await logout();
-      setUser(null);
-      localStorage.removeItem("token"); // Ensure token is cleared
-      toast.success(response.message || "Logged out successfully!"); // Test toast
-      navigate("/login"); // Test immediate navigation
-      console.log("Logout completed, redirecting to /login"); // Debug log
+      if (!logout || typeof logout !== "function") {
+        throw new Error("Logout failed: logout function is unavailable");
+      }
+      const response = await apiLogout(); // Use renamed API logout
+      logout(); // Use context logout to clear state
+      localStorage.removeItem("token"); // Clear token
+      toast.success(response.message || "Logged out successfully!");
+      navigate("/login");
+      console.log("Logout completed, redirecting to /login");
     } catch (err) {
       setError(err.message || "Failed to logout. Please try again.");
-      console.error("Logout error:", err); // Debug error
+      console.error("Logout error:", err);
     }
   };
 
