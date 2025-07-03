@@ -1,23 +1,57 @@
 import axios from "axios";
+import { getUserToken } from "../utils/authUtils";
 
-// Creates an Axios instance configured for API requests to the Django backend
+// Create Axios instance
 const api = axios.create({
-  baseURL: "http://localhost:8000/api", // Base URL for Django backend API endpoints
-  headers: {
-    "Content-Type": "multipart/form-data", // Supports file uploads (e.g., images)
-  },
+  baseURL: "http://localhost:8000/api/",
+  timeout: 10000,
 });
 
-// Adds request interceptor to include authentication token from local storage
+// Automatically attach token if available
 api.interceptors.request.use(
   (config) => {
-    const user = JSON.parse(localStorage.getItem("user")); // Retrieves user data
-    if (user?.token) {
-      config.headers.Authorization = `Bearer ${user.token}`; // Adds token to headers
+    const token = getUserToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      console.log(
+        "📡 Authenticated Request:",
+        config.method,
+        config.url,
+        "Token:",
+        token,
+      );
+    } else {
+      console.warn("⚠️ Request without token:", config.method, config.url);
     }
     return config;
   },
-  (error) => Promise.reject(error), // Handles request errors
+  (error) => Promise.reject(error),
+);
+
+// Handle responses globally
+api.interceptors.response.use(
+  (response) => {
+    console.log(
+      "✅ Response:",
+      response.config.method,
+      response.config.url,
+      response.data,
+    );
+    return response;
+  },
+  (error) => {
+    const res = error.response;
+    console.error(
+      "❌ Error:",
+      res?.config?.method,
+      res?.config?.url,
+      "Status:",
+      res?.status,
+      "Data:",
+      res?.data || error.message,
+    );
+    return Promise.reject(res?.data || { message: "API Error" });
+  },
 );
 
 export default api;

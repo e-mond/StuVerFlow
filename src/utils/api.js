@@ -37,7 +37,7 @@ export {
   requestPasswordReset,
   resetPassword,
   logout,
-} from "../api/auth";
+} from "../api/auth"; // Re-export from auth.js instead of index.js
 export {
   fetchNotifications,
   markAllNotificationsAsRead,

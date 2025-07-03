@@ -37,7 +37,7 @@ function App() {
                 </>
               }
             />
-            {/** Route for auths */}
+            {/** Route for auths */}``
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignUpPage />} />
             <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
