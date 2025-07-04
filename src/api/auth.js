@@ -8,7 +8,7 @@ export const login = async ({ email, password }) => {
   if (!email || !password) throw new Error("Email and password are required");
 
   try {
-    const response = await api.post("user_login/", { email, password }); // Relative path
+    const response = await api.post("user_login/", { email, password }); // Remove /api/ from path
     const user = {
       id: response.data.id,
       name: response.data.name,
@@ -32,7 +32,7 @@ export const signup = async ({ email, password, name }) => {
   }
 
   try {
-    const response = await api.post("signup/", { email, password, name }); // Relative path
+    const response = await api.post("signup/", { email, password, name }); // Remove /api/ from path
     const user = {
       id: response.data.id,
       name: response.data.name,
@@ -54,7 +54,7 @@ export const requestPasswordReset = async (email) => {
   if (!email) throw new Error("Email is required");
 
   try {
-    const response = await api.post("auth/reset-password/request/", { email }); // Relative path
+    const response = await api.post("auth/reset-password/request/", { email }); // Remove /api/ from path
     return { message: response.data.message || "Password reset email sent" };
   } catch (error) {
     console.error(
@@ -76,7 +76,7 @@ export const resetPassword = async (token, newPassword) => {
     const response = await api.post("auth/reset-password/", {
       token,
       newPassword,
-    }); // Relative path
+    }); // Remove /api/ from path
     return { message: response.data.message || "Password reset successfully" };
   } catch (error) {
     console.error(
@@ -92,7 +92,7 @@ export const resetPassword = async (token, newPassword) => {
  */
 export const logout = async () => {
   try {
-    const response = await api.post("logout/", {}); // Relative path
+    const response = await api.post("logout/", {}); // Remove /api/ from path
     setUserToken(""); // Reset token
     return { message: response.data.message || "Logged out successfully" };
   } catch (error) {
