@@ -8,7 +8,7 @@ import Sidebar from "../components/common/Sidebar";
 import TrendingDiscussions from "../components/feed/TrendingDiscussions";
 import ExpertSpotlight from "../components/feed/ExpertSpotlight";
 import NewUsers from "../components/feed/NewUsers";
-import Footer from "../components/feed/Statements";
+
 import {
   fetchHotQuestions,
   fetchQuestionsByInterests,
@@ -17,6 +17,7 @@ import {
 } from "../utils/api";
 import { fetchTrendingTags } from "../utils/api";
 import { fetchExperts } from "../utils/api";
+import Statements from "../components/feed/Statements";
 
 const HomePage = () => {
   const [questions, setQuestions] = useState([]);
@@ -240,7 +241,7 @@ const HomePage = () => {
                 <TrendingDiscussions tags={tags} />
                 <ExpertSpotlight experts={experts} />
                 <NewUsers />
-                <Footer />
+                <Statements />
               </div>
             )}
           </div>
@@ -251,7 +252,7 @@ const HomePage = () => {
           <TrendingDiscussions tags={tags} />
           <ExpertSpotlight experts={experts} />
           <NewUsers />
-          <Footer />
+          <Statements />
         </div>
       </div>
     </div>
