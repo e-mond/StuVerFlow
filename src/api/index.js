@@ -3,7 +3,7 @@ import { getUserToken } from "../utils/authUtils";
 
 // Create Axios instance
 const api = axios.create({
-  baseURL: "http://localhost:8000/api",
+  baseURL: "http://localhost:8000/api/",
   timeout: 10000, // 10-second timeout
 });
 
