@@ -59,8 +59,12 @@ export const updateUserProfile = async (userId, updatedData) => {
     throw new Error("Invalid professional title");
   }
 
-  // No need to reconstruct FormData, use the input directly
-  const response = await api.put(`/users/${userId}/`, formData);
+  const response = await api.put(`users/${userId}/update/`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
   return {
     ...response.data,
     message: response.data.message || "Profile updated",

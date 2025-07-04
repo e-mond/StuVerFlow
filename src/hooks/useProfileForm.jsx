@@ -5,10 +5,10 @@ import { useUser } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 
 export const useProfileForm = () => {
-  const { user, login } = useUser(); // Call hook at top level
+  const { user, login } = useUser();
   const navigate = useNavigate();
 
-  const [isLoading, setIsLoading] = useState(!user?.id); // Initial loading based on user presence
+  const [isLoading, setIsLoading] = useState(!user?.id);
   const [step, setStep] = useState(1);
   const [userType, setUserType] = useState("student");
   const [formData, setFormData] = useState({
@@ -147,10 +147,15 @@ export const useProfileForm = () => {
         };
         login(updatedUser);
         setTimeout(() => {
-          toast.success("Profile setup completed successfully!");
           if (userType === "student" && step === 3) {
+            toast.success(
+              "Welcome to StuVerFlow 🎉 Your student profile is set up.",
+            );
             navigate("/home");
           } else if (userType === "professional" && step === 5) {
+            toast.success(
+              "Submission received! Your profile will be reviewed shortly.",
+            );
             setStep(6);
           }
         }, 0);

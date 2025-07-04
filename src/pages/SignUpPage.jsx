@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import Button from "../components/common/Button";
 import { signup } from "../utils/api";
 import { useUser } from "../context/UserContext";
-import { Eye, EyeOff } from "lucide-react";
 
 const SignUpPage = () => {
   const [formData, setFormData] = useState({
@@ -15,8 +14,6 @@ const SignUpPage = () => {
     confirmPassword: "",
   });
 
-  const [showCreatePassword, setShowCreatePassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordMatchError, setPasswordMatchError] = useState("");
   const [error, setError] = useState(null);
@@ -212,7 +209,7 @@ const SignUpPage = () => {
             </div>
 
             {/* Create password */}
-            <div className="mb-4 relative">
+            <div className="mb-4">
               <label
                 htmlFor="createPassword"
                 className="block text-gray-700 font-medium text-sm sm:text-base"
@@ -220,27 +217,19 @@ const SignUpPage = () => {
                 Create Password
               </label>
               <input
-                type={showCreatePassword ? "text" : "password"}
+                type="password"
                 id="createPassword"
                 name="createPassword"
                 value={formData.createPassword}
                 onChange={handleChange}
-                className="w-full p-2 pr-10 rounded border border-kiwi-200 bg-kiwi-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-kiwi-700 text-sm sm:text-base"
+                className="w-full p-2 rounded border border-kiwi-200 bg-kiwi-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-kiwi-700 text-sm sm:text-base"
                 required
                 placeholder="Create a password"
               />
-              <button
-                type="button"
-                onClick={() => setShowCreatePassword(!showCreatePassword)}
-                className="absolute top-9 right-3 text-gray-500"
-                tabIndex={-1}
-              >
-                {showCreatePassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
             </div>
 
             {/* Confirm password */}
-            <div className="mb-4 relative">
+            <div className="mb-4">
               <label
                 htmlFor="confirmPassword"
                 className="block text-gray-700 font-medium text-sm sm:text-base"
@@ -248,23 +237,15 @@ const SignUpPage = () => {
                 Confirm Password
               </label>
               <input
-                type={showConfirmPassword ? "text" : "password"}
+                type="password"
                 id="confirmPassword"
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="w-full p-2 pr-10 rounded border border-kiwi-200 bg-kiwi-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-kiwi-700 text-sm sm:text-base"
+                className="w-full p-2 rounded border border-kiwi-200 bg-kiwi-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-kiwi-700 text-sm sm:text-base"
                 required
                 placeholder="Confirm your password"
               />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute top-9 right-3 text-gray-500"
-                tabIndex={-1}
-              >
-                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
               {passwordMatchError && (
                 <p className="text-red-600 text-sm mt-1">
                   {passwordMatchError}

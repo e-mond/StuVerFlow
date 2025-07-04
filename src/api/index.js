@@ -3,7 +3,7 @@ import { getUserToken } from "../utils/authUtils";
 
 // Create Axios instance
 const api = axios.create({
-  baseURL: "http://localhost:8000/api/", // Ensure trailing slash
+  baseURL: "http://localhost:8000/api",
   timeout: 10000, // 10-second timeout
 });
 
@@ -14,7 +14,7 @@ api.interceptors.request.use(
     const isLoginRequest =
       config.url === "user_login/" || config.url === "/user_login/";
     const isLogoutRequest =
-      config.url === "logout/" || config.url === "/logout/"; // Add logout exclusion
+      config.url === "logout/" || config.url === "/logout/";
     if (token && !isLoginRequest && !isLogoutRequest) {
       config.headers.Authorization = `Token ${token}`; // Use 'Token' scheme
       if (config.data instanceof FormData) {
