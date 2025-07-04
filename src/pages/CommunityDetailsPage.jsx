@@ -47,7 +47,11 @@ const CommunityDetailsPage = () => {
         setCommunity(selectedCommunity);
         const communityQuestions = await fetchCommunityQuestions(communityId);
         setQuestions(communityQuestions);
-        setIsMember(selectedCommunity.members.includes(user.id));
+        setIsMember(
+          Array.isArray(selectedCommunity.members)
+            ? selectedCommunity.members.includes(user.id)
+            : selectedCommunity.members?.some?.(m => m.id === user.id) || false
+        );
       } catch (err) {
         setError(err.message || "Failed to load community details.");
       } finally {
